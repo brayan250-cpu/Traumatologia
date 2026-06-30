@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { ChevronLeft, ChevronRight, AlertCircle, Check } from 'lucide-react';
+import { ChevronLeft, AlertCircle, Check } from 'lucide-react';
 import { patientSchema, insuranceProviders, type PatientFormData } from '../lib/validation';
 import type { Specialty, Doctor, TimeSlot } from '../types';
 
@@ -66,7 +66,7 @@ export function PatientForm({
 
   const handleBlur = (fieldName: keyof PatientFormData) => {
     setTouched(prev => ({ ...prev, [fieldName]: true }));
-    validateField(fieldName, formData[fieldName]);
+    validateField(fieldName, formData[fieldName] ?? '');
   };
 
   const handleChange = (fieldName: keyof PatientFormData, value: string) => {

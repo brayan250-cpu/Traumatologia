@@ -145,24 +145,36 @@ export function useBooking() {
   const [state, dispatch] = useReducer(bookingReducer, initialState);
 
   const loadSpecialties = useCallback(async () => {
-    const data = await getSpecialties();
-    dispatch({ type: 'SET_SPECIALTIES', payload: data });
+    try {
+      const data = await getSpecialties();
+      dispatch({ type: 'SET_SPECIALTIES', payload: data });
+    } catch {
+      // Keep empty specialties array; App renders loading check
+    }
   }, []);
 
   const selectSpecialty = useCallback(async (specialty: Specialty) => {
     dispatch({ type: 'SELECT_SPECIALTY', payload: specialty });
     dispatch({ type: 'SET_LOADING_DOCTORS', payload: true });
-    const doctors = await getDoctorsBySpecialty(specialty.id);
-    dispatch({ type: 'SET_DOCTORS', payload: doctors });
+    try {
+      const doctors = await getDoctorsBySpecialty(specialty.id);
+      dispatch({ type: 'SET_DOCTORS', payload: doctors });
+    } catch {
+      dispatch({ type: 'SET_LOADING_DOCTORS', payload: false });
+    }
   }, []);
 
   const selectDoctor = useCallback(async (doctor: Doctor) => {
     dispatch({ type: 'SELECT_DOCTOR', payload: doctor });
     dispatch({ type: 'SET_LOADING_AVAILABILITY', payload: true });
-    const today = new Date().toISOString().split('T')[0];
-    const availability = await getAvailability(doctor.id, today);
-    dispatch({ type: 'SET_AVAILABILITY', payload: availability });
-    dispatch({ type: 'GO_TO_STEP', payload: 'calendar' });
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const availability = await getAvailability(doctor.id, today);
+      dispatch({ type: 'SET_AVAILABILITY', payload: availability });
+      dispatch({ type: 'GO_TO_STEP', payload: 'calendar' });
+    } catch {
+      dispatch({ type: 'SET_LOADING_AVAILABILITY', payload: false });
+    }
   }, []);
 
   const selectDate = useCallback((date: string) => {

@@ -231,9 +231,6 @@ const generateTimeSlots = (seed: number): TimeSlot[] => {
   return slots;
 };
 
-// Simulate API failure occasionally
-let bookingAttempts = 0;
-
 // API functions
 export const getSpecialties = async (): Promise<Specialty[]> => {
   return new Promise((resolve) => {
@@ -252,7 +249,7 @@ export const getDoctorsBySpecialty = async (specialtyId: string): Promise<Doctor
   });
 };
 
-export const getAvailability = async (doctorId: string, date: string): Promise<DayAvailability[]> => {
+export const getAvailability = async (doctorId: string, _date: string): Promise<DayAvailability[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const today = new Date();
@@ -288,20 +285,13 @@ export const getAvailability = async (doctorId: string, date: string): Promise<D
   });
 };
 
-export const submitBooking = async (payload: BookingPayload): Promise<BookingResult> => {
-  return new Promise((resolve, reject) => {
+export const submitBooking = async (_payload: BookingPayload): Promise<BookingResult> => {
+  return new Promise((resolve) => {
     setTimeout(() => {
-      bookingAttempts++;
-
-      // Simulate ~15% failure rate
-      if (bookingAttempts % 7 === 0) {
-        reject(new Error('SERVICE_UNAVAILABLE'));
-      } else {
-        resolve({
-          success: true,
-          ticketCode: generateTicketCode()
-        });
-      }
+      resolve({
+        success: true,
+        ticketCode: generateTicketCode()
+      });
     }, 1500);
   });
 };

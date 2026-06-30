@@ -10,7 +10,7 @@ interface BookingSuccessProps {
   onRetry: () => void;
 }
 
-export function BookingSuccess({ result, payload, onReset, onRetry }: BookingSuccessProps) {
+export function BookingSuccess({ result, payload, onReset }: BookingSuccessProps) {
   const [showJSON, setShowJSON] = useState(false);
   const [copied, setCopied] = useState(false);
 
