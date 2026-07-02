@@ -115,14 +115,14 @@ export function BookingSuccess({ result, payload, onReset }: BookingSuccessProps
           <div className="relative h-4 bg-[#F7F8F7]">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-8 bg-[#F7F8F7] rounded-full -ml-4" style={{ boxShadow: 'inset 4px 0 4px rgba(0,0,0,0.05)' }}></div>
             <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-8 bg-[#F7F8F7] rounded-full -mr-4" style={{ boxShadow: 'inset -4px 0 4px rgba(0,0,0,0.05)' }}></div>
-            <div className="absolute left-4 right-4 top-1/2 border-t-2 border-dashed border-[#C97A3D]/30"></div>
+            <div className="absolute left-4 right-4 top-1/2 border-t-2 border-dashed border-[#14B8A6]/30"></div>
           </div>
 
           {/* Bottom Section - Signature Accent */}
           <div className="p-6" style={{ backgroundColor: '#FFFAF5' }}>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <User className="w-5 h-5 text-[#C97A3D] flex-shrink-0 mt-0.5" />
+                <User className="w-5 h-5 text-[#14B8A6] flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs text-[#14201D]/60">Médico</p>
                   <p className="font-medium text-[#14201D]">{payload.doctorName}</p>
@@ -131,7 +131,7 @@ export function BookingSuccess({ result, payload, onReset }: BookingSuccessProps
               </div>
 
               <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-[#C97A3D] flex-shrink-0 mt-0.5" />
+                <MapPin className="w-5 h-5 text-[#14B8A6] flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs text-[#14201D]/60">Ubicación</p>
                   <p className="font-medium text-[#14201D]">Clínica Minda Code</p>
@@ -139,7 +139,7 @@ export function BookingSuccess({ result, payload, onReset }: BookingSuccessProps
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[#C97A3D]/20">
+              <div className="pt-4 border-t border-[#14B8A6]/20">
                 <p className="text-xs text-[#14201D]/60 mb-1">Paciente</p>
                 <p className="font-medium text-[#14201D]">{payload.patient.fullName}</p>
                 <p className="text-sm text-[#14201D]/70">{insuranceName}</p>

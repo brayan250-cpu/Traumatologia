@@ -6,10 +6,10 @@ import { clinicInfo, doctorInfo } from '../services/api';
 gsap.registerPlugin(ScrollTrigger);
 
 const stats = [
-  { value: clinicInfo.patientsServed, suffix: '+', label: 'Pacientes Atendidos',   color: '#00e6b4', color2: '#6c63ff' },
-  { value: clinicInfo.surgeriesCompleted, suffix: '+', label: 'Cirugías Exitosas', color: '#C97A3D', color2: '#ff6b9d' },
-  { value: 18, suffix: '+', label: 'Años de Experiencia',                           color: '#6c63ff', color2: '#00e6b4' },
-  { value: doctorInfo.rating, suffix: '', label: 'Calificación Promedio ★',         color: '#f5b301', color2: '#C97A3D', isFloat: true },
+  { value: clinicInfo.patientsServed, suffix: '+', label: 'Pacientes Atendidos',   color: '#60A5FA', color2: '#2563EB' },
+  { value: clinicInfo.surgeriesCompleted, suffix: '+', label: 'Cirugías Exitosas', color: '#14B8A6', color2: '#BAE6FD' },
+  { value: 18, suffix: '+', label: 'Años de Experiencia',                           color: '#2563EB', color2: '#60A5FA' },
+  { value: doctorInfo.rating, suffix: '', label: 'Calificación Promedio ★',         color: '#60A5FA', color2: '#14B8A6', isFloat: true },
 ];
 
 export function StatsBand() {

@@ -36,8 +36,8 @@ const ACTS = [
       </svg>
     ),
     image: '/images/proceso-02-planificacion.webp',
-    accent: '#C97A3D',
-    bg: 'radial-gradient(ellipse at 40% 60%, rgba(201,122,61,.18) 0%, transparent 65%)',
+    accent: '#14B8A6',
+    bg: 'radial-gradient(ellipse at 40% 60%, rgba(20,184,166,.18) 0%, transparent 65%)',
   },
   {
     tag: 'INTERVENCION',
@@ -176,7 +176,7 @@ export function ScrollStory() {
   return (
     <div ref={sectionRef} id="proceso" style={{ height: '400vh', position: 'relative' }}>
       <div ref={stickyRef} style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'rgba(4,10,8,.85)', overflow: 'hidden' }}>
+        background: 'rgba(7,11,24,.85)', overflow: 'hidden' }}>
 
         {/* Fondo de acento */}
         <div ref={accentRef} style={{ position: 'absolute', inset: 0, transition: 'background 0.8s ease', pointerEvents: 'none' }} />
@@ -200,8 +200,8 @@ export function ScrollStory() {
             </span>
 
             {/* Titulo */}
-            <h2 ref={titleRef} style={{ fontSize: 'clamp(28px,4vw,48px)', fontWeight: 800, lineHeight: 1.1,
-              letterSpacing: '-.025em', color: '#fff', margin: '0 0 20px' }}>
+            <h2 ref={titleRef} style={{ fontSize: 'clamp(28px,4vw,48px)', fontWeight: 700, lineHeight: 1.12,
+              letterSpacing: '-.01em', color: '#fff', margin: '0 0 20px' }}>
               {act0.title}
             </h2>
 
@@ -220,13 +220,13 @@ export function ScrollStory() {
           <div style={{ position: 'relative' }}>
             {/* Barra de progreso */}
             <div style={{ position: 'absolute', top: '-12px', left: 0, right: 0, height: '2px', background: 'rgba(255,255,255,.1)', borderRadius: '1px' }}>
-              <div ref={progressRef} style={{ height: '100%', background: '#00e6b4', borderRadius: '1px', width: '25%', transition: 'width .5s ease' }} />
+              <div ref={progressRef} style={{ height: '100%', background: '#3B82F6', borderRadius: '1px', width: '25%', transition: 'width .5s ease' }} />
             </div>
 
             {/* Contador */}
             <div style={{ position: 'absolute', top: '14px', right: '14px', zIndex: 3,
               fontFamily: '"IBM Plex Mono", monospace', fontSize: '12px', color: 'rgba(255,255,255,.55)',
-              background: 'rgba(0,0,0,.4)', backdropFilter: 'blur(6px)', padding: '4px 10px', borderRadius: '6px' }}>
+              background: 'rgba(30, 30, 30, 0.85)', padding: '4px 10px', borderRadius: '6px' }}>
               <span ref={counterRef}>01 / {String(ACTS.length).padStart(2,'0')}</span>
             </div>
 

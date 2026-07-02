@@ -13,10 +13,10 @@ const serviceIcons: Record<string, React.ReactNode> = {
 };
 
 const SERVICE_COLORS = [
-  { icon: 'rgba(0,230,180,.15)', iconText: '#00e6b4', grad: 'linear-gradient(135deg,#00e6b4,#6c63ff)', glow: 'rgba(0,230,180,.25)' },
-  { icon: 'rgba(108,99,255,.15)', iconText: '#6c63ff', grad: 'linear-gradient(135deg,#6c63ff,#ff6b9d)', glow: 'rgba(108,99,255,.25)' },
-  { icon: 'rgba(255,107,157,.15)', iconText: '#ff6b9d', grad: 'linear-gradient(135deg,#ff6b9d,#C97A3D)', glow: 'rgba(255,107,157,.25)' },
-  { icon: 'rgba(201,122,61,.15)', iconText: '#C97A3D', grad: 'linear-gradient(135deg,#C97A3D,#00e6b4)', glow: 'rgba(201,122,61,.25)' },
+  { icon: 'rgba(96,165,250,.15)', iconText: '#60A5FA', grad: 'linear-gradient(135deg,#60A5FA,#2563EB)', glow: 'rgba(96,165,250,.25)' },
+  { icon: 'rgba(37,99,235,.15)', iconText: '#2563EB', grad: 'linear-gradient(135deg,#2563EB,#BAE6FD)', glow: 'rgba(37,99,235,.25)' },
+  { icon: 'rgba(186,230,253,.15)', iconText: '#BAE6FD', grad: 'linear-gradient(135deg,#BAE6FD,#14B8A6)', glow: 'rgba(186,230,253,.25)' },
+  { icon: 'rgba(20,184,166,.15)', iconText: '#14B8A6', grad: 'linear-gradient(135deg,#14B8A6,#60A5FA)', glow: 'rgba(20,184,166,.25)' },
 ];
 
 export function Services({ onBookAppointment }: { onBookAppointment: () => void }) {
@@ -59,12 +59,12 @@ export function Services({ onBookAppointment }: { onBookAppointment: () => void 
       <div className="max-w-6xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mx-auto mb-14" style={{ maxWidth: '640px' }}>
-          <div className="services-heading inline-flex items-center gap-3 font-mono-mc font-medium uppercase mb-4" style={{ fontSize: '12px', letterSpacing: '.2em', color: '#00e6b4' }}>
-            <span style={{ width: '22px', height: '1px', background: '#C97A3D' }} />
+          <div className="services-heading inline-flex items-center gap-3 font-mono-mc font-medium uppercase mb-4" style={{ fontSize: '12px', letterSpacing: '.2em', color: '#60A5FA' }}>
+            <span style={{ width: '22px', height: '1px', background: '#14B8A6' }} />
             02 · Servicios
           </div>
           <div style={{ overflow: 'hidden' }}>
-            <h2 className="services-heading font-extrabold mb-4 gradient-text-hero" style={{ fontSize: 'clamp(34px,5vw,60px)', letterSpacing: '-.035em', lineHeight: '1', margin: '16px 0 14px' }}>
+            <h2 className="services-heading font-extrabold mb-4 gradient-text-hero" style={{ fontSize: 'clamp(34px,5vw,60px)', letterSpacing: '-.01em', lineHeight: '1', margin: '16px 0 14px' }}>
               Tratamientos<br />especializados
             </h2>
           </div>
@@ -124,7 +124,7 @@ export function Services({ onBookAppointment }: { onBookAppointment: () => void 
           <button
             onClick={onBookAppointment}
             className="inline-flex items-center gap-3 font-semibold text-white rounded-[14px] transition-all hover:-translate-y-0.5 hover:brightness-110"
-            style={{ padding: '16px 36px', background: 'linear-gradient(135deg,#00e6b4,#6c63ff)', fontSize: '16px', border: 'none', cursor: 'pointer', boxShadow: '0 20px 40px -16px rgba(0,230,180,.45)' }}
+            style={{ padding: '16px 36px', background: 'linear-gradient(135deg,#3B82F6,#1D4ED8)', fontSize: '16px', border: 'none', cursor: 'pointer', boxShadow: '0 20px 40px -16px rgba(59,130,246,.45)' }}
           >
             Agendar una consulta
           </button>

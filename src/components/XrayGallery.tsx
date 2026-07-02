@@ -6,14 +6,14 @@ export function XrayGallery() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
 
   return (
-    <section id="rayos-x" style={{ background: 'rgba(20,32,29,.92)', padding: 'clamp(72px,9vw,120px) 0' }}>
+    <section id="rayos-x" style={{ background: 'rgba(8,16,40,.92)', padding: 'clamp(72px,9vw,120px) 0' }}>
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mx-auto mb-11" style={{ maxWidth: '640px' }}>
-          <div className="inline-flex items-center gap-3 font-mono-mc font-medium uppercase mb-4" style={{ fontSize: '12px', letterSpacing: '.2em', color: '#C97A3D' }}>
-            <span style={{ width: '22px', height: '1px', background: '#C97A3D' }} />
+          <div className="inline-flex items-center gap-3 font-mono-mc font-medium uppercase mb-4" style={{ fontSize: '12px', letterSpacing: '.2em', color: '#14B8A6' }}>
+            <span style={{ width: '22px', height: '1px', background: '#14B8A6' }} />
             04 · Galería médica
           </div>
-          <h2 className="font-extrabold text-white mb-4" style={{ fontSize: 'clamp(30px,4.2vw,46px)', letterSpacing: '-.03em', lineHeight: '1.04', margin: '16px 0 14px' }}>
+          <h2 className="font-extrabold text-white mb-4" style={{ fontSize: 'clamp(30px,4.2vw,46px)', letterSpacing: '-.01em', lineHeight: '1.04', margin: '16px 0 14px' }}>
             Imágenes de procedimientos
           </h2>
           <p style={{ fontSize: '17px', color: 'rgba(255,255,255,.6)', lineHeight: '1.55', margin: 0 }}>
@@ -28,10 +28,11 @@ export function XrayGallery() {
               onClick={() => setSelectedImage(i)}
               className="relative overflow-hidden rounded-[16px] group transition-all duration-300"
               style={{ aspectRatio: '1/1', background: '#1a2a27', border: '1px solid rgba(255,255,255,.1)', cursor: 'pointer', padding: 0 }}
-              onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(201,122,61,.5)')}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(20,184,166,.5)')}
               onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,.1)')}
             >
-              <imgloading="lazy" 
+              <img
+loading="lazy" 
                 src={item.image}
                 alt={item.title}
                 className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:opacity-100"
@@ -43,7 +44,7 @@ export function XrayGallery() {
                 <div style={{ fontSize: '12.5px', color: 'rgba(255,255,255,.7)', marginTop: '2px' }}>{item.description}</div>
               </div>
               {/* Zoom icon */}
-              <span className="absolute flex items-center justify-center rounded-full" style={{ top: '14px', right: '14px', width: '36px', height: '36px', background: 'rgba(255,255,255,.16)', backdropFilter: 'blur(4px)', color: '#fff' }}>
+              <span className="absolute flex items-center justify-center rounded-full" style={{ top: '14px', right: '14px', width: '36px', height: '36px', background: 'rgba(30, 30, 30, 0.6)', color: '#fff' }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
                   <circle cx="11" cy="11" r="8" /><line x1="21" x2="16.65" y1="21" y2="16.65" /><line x1="11" x2="11" y1="8" y2="14" /><line x1="8" x2="14" y1="11" y2="11" />
                 </svg>

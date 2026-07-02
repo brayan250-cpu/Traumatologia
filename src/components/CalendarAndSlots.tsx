@@ -32,13 +32,13 @@ export function CalendarAndSlots({
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold mb-1" style={{ color: '#fff', letterSpacing: '-.02em' }}>Selecciona fecha y hora</h2>
+          <h2 className="text-2xl font-bold mb-1" style={{ color: '#fff', letterSpacing: '-.01em' }}>Selecciona fecha y hora</h2>
           <p style={{ color: 'rgba(255,255,255,.5)', fontSize: '14px' }}>Los días en gris no tienen disponibles</p>
         </div>
         <button
           onClick={onBack}
           className="flex items-center gap-2 font-medium"
-          style={{ color: '#00e6b4', background: 'none', border: 'none', cursor: 'pointer' }}
+          style={{ color: '#60A5FA', background: 'none', border: 'none', cursor: 'pointer' }}
         >
           <ChevronLeft className="w-4 h-4" />
           Volver
@@ -47,7 +47,7 @@ export function CalendarAndSlots({
 
       {isLoadingAvailability ? (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00e6b4]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#60A5FA]"></div>
           <span className="ml-3" style={{ color: 'rgba(255,255,255,.5)' }}>Cargando disponibilidad...</span>
         </div>
       ) : (
@@ -73,12 +73,12 @@ export function CalendarAndSlots({
                     border: 'none', cursor: day.hasSlots ? 'pointer' : 'not-allowed',
                     transition: 'all .2s',
                     background: selectedDate === day.date
-                      ? '#00e6b4'
+                      ? '#3B82F6'
                       : day.hasSlots
                       ? 'rgba(255,255,255,.07)'
                       : 'rgba(255,255,255,.02)',
                     color: selectedDate === day.date
-                      ? '#020d18'
+                      ? '#ffffff'
                       : day.hasSlots
                       ? '#fff'
                       : 'rgba(255,255,255,.2)',
@@ -125,9 +125,9 @@ export function CalendarAndSlots({
                             padding: '8px 6px', borderRadius: '8px', fontSize: '13px', fontWeight: 500,
                             border: selectedSlot?.id === slot.id ? 'none' : '1px solid rgba(255,255,255,.12)',
                             cursor: slot.available ? 'pointer' : 'not-allowed', transition: 'all .2s',
-                            background: selectedSlot?.id === slot.id ? '#00e6b4'
+                            background: selectedSlot?.id === slot.id ? '#3B82F6'
                               : slot.available ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.02)',
-                            color: selectedSlot?.id === slot.id ? '#020d18'
+                            color: selectedSlot?.id === slot.id ? '#ffffff'
                               : slot.available ? '#fff' : 'rgba(255,255,255,.2)',
                             textDecoration: slot.available ? 'none' : 'line-through',
                           }}
@@ -157,9 +157,9 @@ export function CalendarAndSlots({
                             padding: '8px 6px', borderRadius: '8px', fontSize: '13px', fontWeight: 500,
                             border: selectedSlot?.id === slot.id ? 'none' : '1px solid rgba(255,255,255,.12)',
                             cursor: slot.available ? 'pointer' : 'not-allowed', transition: 'all .2s',
-                            background: selectedSlot?.id === slot.id ? '#00e6b4'
+                            background: selectedSlot?.id === slot.id ? '#3B82F6'
                               : slot.available ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.02)',
-                            color: selectedSlot?.id === slot.id ? '#020d18'
+                            color: selectedSlot?.id === slot.id ? '#ffffff'
                               : slot.available ? '#fff' : 'rgba(255,255,255,.2)',
                             textDecoration: slot.available ? 'none' : 'line-through',
                           }}
@@ -183,7 +183,7 @@ export function CalendarAndSlots({
           <button
             onClick={onContinue}
             className="flex items-center gap-2 font-semibold transition-all hover:brightness-110"
-            style={{ padding: '14px 32px', borderRadius: '12px', background: 'linear-gradient(135deg,#00e6b4,#6c63ff)', color: '#020d18', fontSize: '15px', border: 'none', cursor: 'pointer', boxShadow: '0 16px 40px -12px rgba(0,230,180,.4)' }}
+            style={{ padding: '14px 32px', borderRadius: '12px', background: 'linear-gradient(135deg,#3B82F6,#1D4ED8)', color: '#fff', fontSize: '15px', border: 'none', cursor: 'pointer', boxShadow: '0 16px 40px -12px rgba(59,130,246,.4)' }}
           >
             Continuar
             <ChevronRight className="w-4 h-4" />

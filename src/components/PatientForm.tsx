@@ -124,13 +124,13 @@ export function PatientForm({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold mb-1" style={{ color: '#fff', letterSpacing: '-.02em' }}>Completa tus datos</h2>
+          <h2 className="text-2xl font-bold mb-1" style={{ color: '#fff', letterSpacing: '-.01em' }}>Completa tus datos</h2>
           <p style={{ color: 'rgba(255,255,255,.5)', fontSize: '14px' }}>Verificaremos tu información antes de confirmar</p>
         </div>
         <button
           onClick={onBack}
           className="flex items-center gap-2 font-medium transition-colors"
-          style={{ color: '#00e6b4', fontSize: '14px', background: 'none', border: 'none', cursor: 'pointer' }}
+          style={{ color: '#60A5FA', fontSize: '14px', background: 'none', border: 'none', cursor: 'pointer' }}
           disabled={isSubmitting}
         >
           <ChevronLeft className="w-4 h-4" />
@@ -139,8 +139,8 @@ export function PatientForm({
       </div>
 
       {/* Resumen de cita */}
-      <div style={{ background: 'rgba(0,230,180,.07)', border: '1px solid rgba(0,230,180,.2)', borderRadius: '14px', padding: '16px 20px' }}>
-        <h3 style={{ fontSize: '12px', fontFamily: '"IBM Plex Mono", monospace', letterSpacing: '.14em', textTransform: 'uppercase', color: '#00e6b4', marginBottom: '12px' }}>Resumen de tu cita</h3>
+      <div style={{ background: 'rgba(59,130,246,.07)', border: '1px solid rgba(59,130,246,.2)', borderRadius: '14px', padding: '16px 20px' }}>
+        <h3 style={{ fontSize: '12px', fontFamily: '"IBM Plex Mono", monospace', letterSpacing: '.14em', textTransform: 'uppercase', color: '#60A5FA', marginBottom: '12px' }}>Resumen de tu cita</h3>
         <div className="grid sm:grid-cols-2 gap-2" style={{ fontSize: '14px' }}>
           <div><span style={{ color: 'rgba(255,255,255,.45)' }}>Especialidad: </span><span style={{ color: '#fff', fontWeight: 500 }}>{specialty.name}</span></div>
           <div><span style={{ color: 'rgba(255,255,255,.45)' }}>Médico: </span><span style={{ color: '#fff', fontWeight: 500 }}>{doctor.name}</span></div>
@@ -163,7 +163,7 @@ export function PatientForm({
           }
           .dark-input::placeholder { color: rgba(255,255,255,.3); }
           .dark-input:hover { border-color: rgba(255,255,255,.28); }
-          .dark-input:focus { border-color: #00e6b4; box-shadow: 0 0 0 3px rgba(0,230,180,.15); }
+          .dark-input:focus { border-color: #60A5FA; box-shadow: 0 0 0 3px rgba(96,165,250,.15); }
           .dark-input:disabled { opacity: .5; cursor: not-allowed; }
           .dark-input.error { border-color: #f87171; }
           .dark-input.error:focus { box-shadow: 0 0 0 3px rgba(248,113,113,.15); }
@@ -287,7 +287,7 @@ export function PatientForm({
             type="submit"
             disabled={isSubmitting || !isFormValid}
             className="flex items-center gap-2 font-semibold transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ padding: '14px 32px', borderRadius: '12px', background: 'linear-gradient(135deg,#00e6b4,#6c63ff)', color: '#020d18', fontSize: '15px', border: 'none', cursor: 'pointer', boxShadow: '0 16px 40px -12px rgba(0,230,180,.45)' }}
+            style={{ padding: '14px 32px', borderRadius: '12px', background: 'linear-gradient(135deg,#3B82F6,#1D4ED8)', color: '#fff', fontSize: '15px', border: 'none', cursor: 'pointer', boxShadow: '0 16px 40px -12px rgba(59,130,246,.45)' }}
           >
             {isSubmitting ? (
               <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />Confirmando...</>

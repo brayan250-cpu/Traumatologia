@@ -8,9 +8,9 @@
  * REQUIERE: public/models/knee.glb
  * DEPS:  three  @react-three/fiber  @react-three/drei
  */
-import { Suspense, useLayoutEffect, useRef } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, invalidate, useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -21,9 +21,14 @@ gsap.registerPlugin(ScrollTrigger);
 useGLTF.preload('/models/knee.glb');
 
 /* ── Paleta ──────────────────────────────────────── */
-const TEAL   = '#00e6b4';
-const VIOLET = '#6c63ff';
-const BASE   = '#030814';
+const TEAL   = '#60A5FA';
+const VIOLET = '#0D9488';
+const BASE   = '#070B1A';
+const BONE_BASE_COLOR = new THREE.Color('#ddd4be');
+const BONE_VIOLET_COLOR = new THREE.Color('#e0d4b0');
+const WARM_WHITE = new THREE.Color('#fff8f0');
+const TEAL_COLOR = new THREE.Color(TEAL);
+const VIOLET_COLOR = new THREE.Color(VIOLET);
 
 /* ── Helpers ─────────────────────────────────────── */
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
@@ -49,12 +54,12 @@ const baseBone = () => new THREE.MeshStandardMaterial({
 });
 const baseCartilage = () => new THREE.MeshStandardMaterial({
   color: '#c8e0e8', roughness: 0.55, metalness: 0,
-  emissive: new THREE.Color('#00e6b4'), emissiveIntensity: 0,
+  emissive: new THREE.Color('#60A5FA'), emissiveIntensity: 0,
   transparent: true, opacity: 0.92,
 });
 const baseLigament = () => new THREE.MeshStandardMaterial({
   color: '#e4dcc8', roughness: 0.68, metalness: 0,
-  emissive: new THREE.Color('#00e6b4'), emissiveIntensity: 0,
+  emissive: new THREE.Color('#60A5FA'), emissiveIntensity: 0,
 });
 
 /* ── Escena 3D con GLB ────────────────────────────── */
@@ -63,10 +68,17 @@ function KneeModel({ progressRef }: { progressRef: { current: number } }) {
   const groupRef  = useRef<THREE.Group>(null);
   const keyRef    = useRef<THREE.PointLight>(null);
   const fillRef   = useRef<THREE.PointLight>(null);
+  const boneMeshesRef = useRef<THREE.Mesh[]>([]);
+  const cartilageMeshesRef = useRef<THREE.Mesh[]>([]);
+  const ligamentMeshesRef = useRef<THREE.Mesh[]>([]);
+  const midKeyColorRef = useRef(new THREE.Color());
 
   /* Clasificar y aplicar materiales al montar */
   useLayoutEffect(() => {
     const meshes: THREE.Mesh[] = [];
+    boneMeshesRef.current = [];
+    cartilageMeshesRef.current = [];
+    ligamentMeshesRef.current = [];
     scene.traverse(obj => {
       if ((obj as THREE.Mesh).isMesh) meshes.push(obj as THREE.Mesh);
     });
@@ -85,14 +97,17 @@ function KneeModel({ progressRef }: { progressRef: { current: number } }) {
         // Piezas grandes → hueso principal
         m.material = baseBone();
         m.userData.type = 'bone';
+        boneMeshesRef.current.push(m);
       } else if (ratio > 0.04) {
         // Piezas medianas → cartílago/menisco
         m.material = baseCartilage();
         m.userData.type = 'cartilage';
+        cartilageMeshesRef.current.push(m);
       } else {
         // Piezas pequeñas → ligamentos/tendones
         m.material = baseLigament();
         m.userData.type = 'ligament';
+        ligamentMeshesRef.current.push(m);
       }
       m.castShadow = m.receiveShadow = true;
     });
@@ -106,69 +121,60 @@ function KneeModel({ progressRef }: { progressRef: { current: number } }) {
     scene.scale.setScalar(5.2 / maxSide);
   }, [scene]);
 
-  useFrame((_, delta) => {
+  useFrame(() => {
     const p = progressRef.current;
     if (!groupRef.current) return;
     const g = groupRef.current;
-    const damp = (cur: number, tgt: number, lam = 5) =>
-      THREE.MathUtils.damp(cur, tgt, lam, delta);
 
     /* Rotación por acto — empieza de frente (y=0) */
-    g.rotation.y = damp(g.rotation.y,
-      keyed(p, [[0,0],[0.2,0.5],[0.4,1.4],[0.6,2.4],[0.8,Math.PI*1.45],[1,Math.PI*1.65]]));
-    g.rotation.x = damp(g.rotation.x,
-      keyed(p, [[0,-0.05],[0.4,0],[0.8,0.06],[1,0.06]]));
+    g.rotation.y = keyed(p, [[0,0],[0.2,0.5],[0.4,1.4],[0.6,2.4],[0.8,Math.PI*1.45],[1,Math.PI*1.65]]);
+    g.rotation.x = keyed(p, [[0,-0.05],[0.4,0],[0.8,0.06],[1,0.06]]);
 
     /* Escala: zoom sutil en acto 2, dolly-out final */
-    g.scale.setScalar(damp(g.scale.x,
-      keyed(p, [[0,0.90],[0.2,1.05],[0.4,1.0],[0.6,0.97],[0.8,0.88],[1,0.70]])));
+    g.scale.setScalar(keyed(p, [[0,0.90],[0.2,1.05],[0.4,1.0],[0.6,0.97],[0.8,0.88],[1,0.70]]));
 
     /* Efectos de material por acto */
-    scene.traverse(obj => {
-      if (!(obj as THREE.Mesh).isMesh) return;
-      const m = obj as THREE.Mesh;
-      const mat = m.material as THREE.MeshStandardMaterial;
-      if (!mat) return;
+    for (const m of cartilageMeshesRef.current) {
+      const mat = m.material as THREE.MeshStandardMaterial | undefined;
+      if (!mat) continue;
+      /* Act 2: cartílagos brillan teal */
+      mat.emissiveIntensity = 0.55 * smooth(p, 0.18, 0.28) * (1 - smooth(p, 0.44, 0.54));
+      mat.opacity = clamp01(0.35 + 0.65 * (1 - smooth(p, 0.44, 0.54)));
+    }
 
-      if (m.userData.type === 'cartilage') {
-        /* Act 2: cartílagos brillan teal */
-        mat.emissiveIntensity = 0.55 * smooth(p, 0.18, 0.28) * (1 - smooth(p, 0.44, 0.54));
-        mat.opacity = clamp01(0.35 + 0.65 * (1 - smooth(p, 0.44, 0.54)));
-      }
-      if (m.userData.type === 'ligament') {
-        /* Act 2-3: ligamentos con glow */
-        mat.emissiveIntensity = 0.45 * smooth(p, 0.22, 0.32) * (1 - smooth(p, 0.50, 0.60));
-      }
-      if (m.userData.type === 'bone') {
-        /* Act 4: hueso con tinte violeta */
-        const toV = smooth(p, 0.60, 0.74);
-        mat.color.lerpColors(new THREE.Color('#ddd4be'), new THREE.Color('#c8c0e0'), toV);
-      }
-    });
+    for (const m of ligamentMeshesRef.current) {
+      const mat = m.material as THREE.MeshStandardMaterial | undefined;
+      if (!mat) continue;
+      /* Act 2-3: ligamentos con glow */
+      mat.emissiveIntensity = 0.45 * smooth(p, 0.22, 0.32) * (1 - smooth(p, 0.50, 0.60));
+    }
+
+    const toV = smooth(p, 0.60, 0.74);
+    for (const m of boneMeshesRef.current) {
+      const mat = m.material as THREE.MeshStandardMaterial | undefined;
+      if (!mat) continue;
+      /* Act 4: hueso con tinte violeta */
+      mat.color.lerpColors(BONE_BASE_COLOR, BONE_VIOLET_COLOR, toV);
+    }
 
     /* Luz key: blanco cálido → teal sutil → violeta en acto 4 */
     if (keyRef.current) {
       const toT = smooth(p, 0.10, 0.30); // blanco → teal suave
-      const toV = smooth(p, 0.58, 0.72); // teal → violeta
-      const warmWhite = new THREE.Color('#fff8f0');
-      const tealColor = new THREE.Color(TEAL);
-      const violetColor = new THREE.Color(VIOLET);
-      const midColor = warmWhite.clone().lerp(tealColor, toT * 0.45);
-      keyRef.current.color.lerpColors(midColor, violetColor, toV);
-      keyRef.current.intensity = damp(keyRef.current.intensity,
-        2.2 + 1.2 * smooth(p, 0.60, 0.72) * (1 - smooth(p, 0.82, 0.94)));
+      const toViolet = smooth(p, 0.58, 0.72); // teal → violeta
+      const midColor = midKeyColorRef.current.copy(WARM_WHITE).lerp(TEAL_COLOR, toT * 0.45);
+      keyRef.current.color.copy(midColor).lerp(VIOLET_COLOR, toViolet);
+      keyRef.current.intensity = 2.2 + 1.2 * smooth(p, 0.60, 0.72) * (1 - smooth(p, 0.82, 0.94));
     }
     if (fillRef.current) {
-      fillRef.current.intensity = damp(fillRef.current.intensity,
-        0.6 + 0.5 * smooth(p, 0.60, 0.72));
+      fillRef.current.intensity = 0.6 + 0.5 * smooth(p, 0.60, 0.72);
     }
   });
 
   return (
     <group ref={groupRef}>
-      <ambientLight intensity={0.28} color="#f0f4ff" />
+      <ambientLight intensity={0.28} color="#fdf6e8" />
       <pointLight ref={keyRef}  color="#fff8f0"  position={[3.0, 3.5, 4.5]} intensity={2.2} decay={0} />
-      <pointLight ref={fillRef} color="#d0e8ff"  position={[-4, -2.0, 2.5]} intensity={0.6} decay={0} />
+      <pointLight ref={fillRef} color="#f3e0b8"  position={[-4, -2.0, 2.5]} intensity={0.6} decay={0} />
       <directionalLight color="#ffffff" position={[0, 5, 3]} intensity={0.5} />
       <primitive object={scene} />
     </group>
@@ -187,25 +193,26 @@ function KneeFallback() {
 
 /* ── Fondos radiales por acto ─────────────────────── */
 const BGS = [
-  'radial-gradient(900px 600px at 65% 44%, rgba(0,230,180,.12) 0%, transparent 65%)',
-  'radial-gradient(800px 550px at 30% 50%, rgba(0,230,180,.14) 0%, transparent 60%), radial-gradient(600px 400px at 75% 28%, rgba(168,216,234,.08) 0%, transparent 55%)',
-  'radial-gradient(900px 600px at 68% 48%, rgba(0,230,180,.10) 0%, transparent 65%), radial-gradient(600px 400px at 30% 60%, rgba(232,223,200,.06) 0%, transparent 55%)',
-  'radial-gradient(1000px 700px at 50% 55%, rgba(108,99,255,.22) 0%, transparent 65%)',
-  'radial-gradient(1100px 750px at 50% 45%, rgba(0,230,180,.11) 0%, transparent 65%), radial-gradient(800px 500px at 60% 60%, rgba(108,99,255,.10) 0%, transparent 55%)',
+  'radial-gradient(900px 600px at 65% 44%, rgba(96,165,250,.12) 0%, transparent 65%)',
+  'radial-gradient(800px 550px at 30% 50%, rgba(96,165,250,.14) 0%, transparent 60%), radial-gradient(600px 400px at 75% 28%, rgba(168,216,234,.08) 0%, transparent 55%)',
+  'radial-gradient(900px 600px at 68% 48%, rgba(59,130,246,.10) 0%, transparent 65%), radial-gradient(600px 400px at 30% 60%, rgba(186,230,253,.06) 0%, transparent 55%)',
+  'radial-gradient(1000px 700px at 50% 55%, rgba(13,148,136,.22) 0%, transparent 65%)',
+  'radial-gradient(1100px 750px at 50% 45%, rgba(96,165,250,.11) 0%, transparent 65%), radial-gradient(800px 500px at 60% 60%, rgba(13,148,136,.10) 0%, transparent 55%)',
 ];
 
 /* ── Estilos ──────────────────────────────────────── */
 const MONO = '"IBM Plex Mono", monospace';
 const tagSt: React.CSSProperties = {
   display: 'inline-flex', alignItems: 'center', gap: 10,
-  fontFamily: MONO, fontSize: 11, letterSpacing: '0.20em',
-  textTransform: 'uppercase', color: TEAL, fontWeight: 500,
+  fontFamily: MONO, fontSize: 10, letterSpacing: '0.22em',
+  textTransform: 'uppercase', color: 'rgba(255,255,255,.38)', fontWeight: 400,
 };
-const dash: React.CSSProperties = { width: 22, height: 1, background: TEAL, opacity: 0.65 };
+const dash: React.CSSProperties = { width: 18, height: 1, background: 'rgba(255,255,255,.25)', opacity: 0.8 };
 const h3St: React.CSSProperties = {
-  fontSize: 'clamp(30px, 3.8vw, 52px)', fontWeight: 700,
-  lineHeight: 1.12, letterSpacing: '-0.025em',
-  color: 'rgba(255,255,255,.92)', margin: '16px 0 0',
+  fontFamily: "'Playfair Display', Georgia, serif",
+  fontSize: 'clamp(34px, 4.4vw, 58px)', fontWeight: 700,
+  lineHeight: 1.12, letterSpacing: '-0.02em',
+  color: 'rgba(255,255,255,.95)', margin: '10px 0 0',
 };
 const subSt: React.CSSProperties = {
   marginTop: 14, fontSize: 15, lineHeight: 1.6,
@@ -222,6 +229,24 @@ export function AnatomyScrollExperience() {
   const railRefs      = useRef<(HTMLSpanElement | null)[]>([]);
   const hintRef       = useRef<HTMLDivElement>(null);
   const metricValRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const [inView, setInView] = useState(false);
+
+  // Montar el Canvas una sola vez — nunca desmontarlo (evita desaparecer al volver a scrollear)
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          io.disconnect(); // latch: una vez montado, nunca se desmonta
+        }
+      },
+      { rootMargin: '300px 0px' }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
@@ -255,11 +280,12 @@ export function AnatomyScrollExperience() {
           scrub: 0.55,
           onUpdate: self => {
             progressRef.current = self.progress;
+            invalidate();
             const idx = Math.min(4, Math.floor(self.progress * 5));
             railRefs.current.forEach((r, i) => {
               if (!r) return;
-              r.style.color   = i === idx ? TEAL : 'rgba(255,255,255,.25)';
-              r.style.opacity = i === idx ? '1' : '.55';
+              r.style.background = i === idx ? TEAL : 'rgba(255,255,255,.2)';
+              r.style.transform  = i === idx ? 'scale(1.4)' : 'scale(1)';
             });
           },
         },
@@ -320,8 +346,6 @@ export function AnatomyScrollExperience() {
     },
   ];
 
-  const NOISE = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")`;
-
   return (
     <section
       ref={sectionRef}
@@ -336,21 +360,23 @@ export function AnatomyScrollExperience() {
             style={{ position: 'absolute', inset: 0, background: bg, opacity: i === 0 ? 1 : 0 }} />
         ))}
 
-        {/* Canvas 3D con Suspense */}
+        {/* Canvas 3D — se monta una sola vez y permanece */}
         <div style={{ position: 'absolute', inset: 0 }}>
-          <Canvas dpr={[1, 1.8]} camera={{ position: [0, 0, 7], fov: 36 }}
-            gl={{ antialias: true, alpha: true }} style={{ position: 'absolute', inset: 0 }}>
-            <Suspense fallback={<KneeFallback />}>
-              <KneeModel progressRef={progressRef} />
-            </Suspense>
-          </Canvas>
+          {inView && (
+            <Canvas
+              frameloop="demand"
+              dpr={[1, 1.25]}
+              camera={{ position: [0, 0, 7], fov: 36 }}
+              gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+              onCreated={({ invalidate }) => invalidate()}
+              style={{ position: 'absolute', inset: 0 }}
+            >
+              <Suspense fallback={<KneeFallback />}>
+                <KneeModel progressRef={progressRef} />
+              </Suspense>
+            </Canvas>
+          )}
         </div>
-
-        {/* Noise */}
-        <div aria-hidden="true" style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.022,
-          backgroundImage: NOISE, backgroundRepeat: 'repeat', backgroundSize: '200px',
-        }} />
 
         {/* Actos 1–3 */}
         {acts123.map((act, i) => (
@@ -428,7 +454,7 @@ export function AnatomyScrollExperience() {
                   background: `linear-gradient(135deg, ${TEAL} 0%, ${VIOLET} 100%)`,
                   color: '#020d18', fontWeight: 700, fontSize: 13.5,
                   letterSpacing: '0.07em', textTransform: 'uppercase', textDecoration: 'none',
-                  boxShadow: '0 20px 55px -12px rgba(0,230,180,.50), 0 8px 28px -8px rgba(108,99,255,.38)',
+                  boxShadow: '0 20px 55px -12px rgba(59,130,246,.50), 0 8px 28px -8px rgba(13,148,136,.38)',
                 }}>
                 Agendar consulta
               </a>
@@ -445,17 +471,18 @@ export function AnatomyScrollExperience() {
           <span style={{ width: 1, height: 32, background: `linear-gradient(${TEAL}, transparent)` }} />
         </div>
 
-        {/* Riel de progreso */}
-        <div className="hidden md:flex" style={{ position: 'absolute', right: '3vw', top: '50%', transform: 'translateY(-50%)', flexDirection: 'column', alignItems: 'center', gap: 12, pointerEvents: 'none' }}>
+        {/* Riel de progreso — solo la línea y un dot activo */}
+        <div className="hidden md:flex" style={{ position: 'absolute', right: '3vw', top: '50%', transform: 'translateY(-50%)', flexDirection: 'column', alignItems: 'center', gap: 8, pointerEvents: 'none' }}>
           <div style={{ position: 'relative', width: 1, height: 110, background: 'rgba(255,255,255,.12)' }}>
             <div ref={railFillRef} style={{ position: 'absolute', inset: 0, background: TEAL, transformOrigin: 'top', transform: 'scaleY(0)' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {['01','02','03','04','05'].map((n, i) => (
-              <span key={n} ref={el => (railRefs.current[i] = el)}
-                style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.14em', color: i === 0 ? TEAL : 'rgba(255,255,255,.25)', transition: 'color .3s' }}>
-                {n}
-              </span>
+            {['','','','',''].map((_, i) => (
+              <span key={i} ref={el => (railRefs.current[i] = el)}
+                style={{ display: 'block', width: 5, height: 5, borderRadius: '50%',
+                  background: i === 0 ? TEAL : 'rgba(255,255,255,.2)',
+                  transition: 'background .3s, transform .3s',
+                  transform: i === 0 ? 'scale(1.4)' : 'scale(1)' }} />
             ))}
           </div>
         </div>

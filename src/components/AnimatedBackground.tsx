@@ -1,9 +1,9 @@
 ﻿/**
  * AnimatedBackground — Performance Edition
- * 30fps cap · 45 stars · 3 orbs · sin aurora · sin spotlight de canvas
+ * FPS cap adaptativo · menos partículas · sin aurora · sin spotlight de canvas
  * El spotlight lo hace el CursorFollower via CSS (sin RAF extra).
  */
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface Stage {
   base:   [number, number, number];
@@ -12,10 +12,10 @@ interface Stage {
 }
 
 const STAGES: Stage[] = [
-  { base: [3,   8,  14], core: [0,  230, 180], accent: [108, 99, 255] },
-  { base: [5,   5,  18], core: [108, 99, 255],  accent: [0,  200, 255] },
-  { base: [14,  8,   4], core: [255, 120,  60], accent: [0,  200, 160] },
-  { base: [3,   6,  20], core: [40,  160, 255], accent: [130, 80, 255] },
+  { base: [7,  11,  26], core: [59,  130, 246], accent: [20,  184, 166] },
+  { base: [7,  12,  30], core: [96,  165, 250], accent: [13,  148, 136] },
+  { base: [6,  14,  28], core: [56,  189, 248], accent: [59,  130, 246] },
+  { base: [5,  17,  22], core: [20,  184, 166], accent: [59,  130, 246] },
 ];
 
 function lerp(a: number, b: number, t: number) {
@@ -29,9 +29,9 @@ function lerpStage(a: Stage, b: Stage, t: number): Stage {
   };
 }
 
-/* 45 partículas (era 160) */
+/* Partículas reducidas para mantener frame-time estable */
 interface Star { x: number; y: number; r: number; speed: number; phase: number; opacity: number; }
-const STARS: Star[] = Array.from({ length: 45 }, () => ({
+const STARS: Star[] = Array.from({ length: 24 }, () => ({
   x: Math.random(), y: Math.random(),
   r: Math.random() * 1.4 + 0.2,
   speed: Math.random() * 0.00006 + 0.00002,
@@ -39,9 +39,9 @@ const STARS: Star[] = Array.from({ length: 45 }, () => ({
   opacity: Math.random() * 0.5 + 0.1,
 }));
 
-/* 3 orbs (era 6) */
+/* Orbs reducidos */
 interface Orb { x: number; y: number; r: number; sX: number; sY: number; pX: number; pY: number; isAccent: boolean; }
-const ORBS: Orb[] = Array.from({ length: 3 }, (_, i) => ({
+const ORBS: Orb[] = Array.from({ length: 2 }, (_, i) => ({
   x: 0.15 + i * 0.35, y: 0.2 + (i % 2) * 0.5,
   r: 0.28 + (i % 2) * 0.06,
   sX: 0.00014 + i * 0.00007, sY: 0.00018 + i * 0.00009,
@@ -49,24 +49,27 @@ const ORBS: Orb[] = Array.from({ length: 3 }, (_, i) => ({
   isAccent: i % 2 === 1,
 }));
 
-interface Props { scrollProgress: number }
+interface Props { scrollProgressRef: React.RefObject<number> }
 
-export function AnimatedBackground({ scrollProgress }: Props) {
+export function AnimatedBackground({ scrollProgressRef }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef    = useRef<number>(0);
-  const progRef   = useRef(0);
-
-  useEffect(() => { progRef.current = scrollProgress; }, [scrollProgress]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { alpha: false })!;
 
-    /* Escala al 75% en mobile para reducir pixels dibujados */
-    const dpr = Math.min(window.devicePixelRatio, 2) * (window.innerWidth < 768 ? 0.6 : 0.85);
+    const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+    const cores = navigator.hardwareConcurrency || 4;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const lowPower = reducedMotion || cores <= 4 || (typeof mem === 'number' && mem <= 4);
+
+    /* Menos pixeles dibujados para bajar carga de rasterización */
+    const dpr = Math.min(window.devicePixelRatio, 2) * (window.innerWidth < 768 ? 0.58 : (lowPower ? 0.66 : 0.78));
 
     const resize = () => {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       canvas.width  = Math.round(window.innerWidth  * dpr);
       canvas.height = Math.round(window.innerHeight * dpr);
       canvas.style.width  = window.innerWidth  + 'px';
@@ -78,18 +81,18 @@ export function AnimatedBackground({ scrollProgress }: Props) {
 
     let t = 0;
     let frame = 0;
-    const SKIP = 2; // dibuja cada 2 frames → 30fps en pantallas de 60Hz
+    const SKIP = lowPower ? 4 : 3; // ~15-20fps en 60Hz
 
     const draw = () => {
       rafRef.current = requestAnimationFrame(draw);
       frame++;
-      if (frame % SKIP !== 0) return; // ← 30fps cap
+      if (frame % SKIP !== 0) return;
 
       const W = window.innerWidth;
       const H = window.innerHeight;
       t += SKIP; // avanzar t al mismo ritmo visual
 
-      const raw   = progRef.current;
+      const raw   = scrollProgressRef.current ?? 0;
       const iA    = Math.min(Math.floor(raw), STAGES.length - 2);
       const stage = lerpStage(STAGES[iA], STAGES[iA + 1], raw - iA);
       const [br, bg, bb] = stage.base;
@@ -157,10 +160,21 @@ export function AnimatedBackground({ scrollProgress }: Props) {
       rafRef.current = requestAnimationFrame(draw);
     }, 80);
 
+    // Pausar el loop cuando la pestaña no está visible → 0% CPU en background
+    const onVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(rafRef.current);
+      } else {
+        rafRef.current = requestAnimationFrame(draw);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
     return () => {
       clearTimeout(startTimeout);
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
 
