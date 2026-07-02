@@ -1,16 +1,20 @@
 ﻿/**
- * AnatomyScrollExperience.tsx  v3 — GLB real
+ * AnatomyScrollExperience.tsx  v5 — modelo persistente en toda la página
  * ────────────────────────────────────────────
  * Carga el modelo knee.glb generado con Tripo3D.
  * Materiales aplicados desde código → teal/ivory/violet por acto.
- * Cámara fija, solo el modelo rota con scroll.
+ * El Canvas es GLOBAL y fijo (AnatomyGlobalCanvas, montado en App):
+ * fuera de la sección de anatomía el modelo orbita pequeño al costado
+ * siguiendo el scroll de la página; al entrar en la sección toma el
+ * centro y ejecuta la coreografía por actos (rotación amortiguada +
+ * vista explosionada de capas hueso/cartílago/ligamento).
  *
  * REQUIERE: public/models/knee.glb
  * DEPS:  three  @react-three/fiber  @react-three/drei
  */
-import { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { Canvas, invalidate, useFrame } from '@react-three/fiber';
+import { Canvas, invalidate, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -23,7 +27,6 @@ useGLTF.preload('/models/knee.glb');
 /* ── Paleta ──────────────────────────────────────── */
 const TEAL   = '#60A5FA';
 const VIOLET = '#0D9488';
-const BASE   = '#070B1A';
 const BONE_BASE_COLOR = new THREE.Color('#ddd4be');
 const BONE_VIOLET_COLOR = new THREE.Color('#e0d4b0');
 const WARM_WHITE = new THREE.Color('#fff8f0');
@@ -46,6 +49,26 @@ const keyed = (p: number, keys: KF[]) => {
   return keys[keys.length - 1][1];
 };
 
+/* ── Estado compartido sección ↔ lienzo global ─────
+   La sección escribe su progreso y su elemento; el Canvas fijo
+   (montado en App) los lee cada frame para posicionar el modelo. */
+const anatomyShared = {
+  progress: 0,
+  sectionEl: null as HTMLElement | null,
+};
+const REDUCED_MOTION = typeof window !== 'undefined'
+  && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ── Perfil móvil (mismo criterio pointer:coarse que App) ──
+   Menos resolución, damping que se asienta antes (menos frames por
+   scroll) y modelo más discreto para no estorbar la lectura. */
+const IS_COARSE = typeof window !== 'undefined'
+  && window.matchMedia('(pointer: coarse)').matches;
+const DAMP   = IS_COARSE ? 0.18 : 0.14; // factor de inercia por frame
+const OUT_OP = IS_COARSE ? 0.26 : 0.40; // opacidad del lienzo fuera de la sección
+const IN_OP  = IS_COARSE ? 0.88 : 1;    // opacidad dentro (móvil: texto centrado encima)
+const OUT_SC = IS_COARSE ? 0.38 : 0.52; // escala del modelo fuera de la sección
+
 /* ── Materiales médicos ───────────────────────────── */
 // Todos los materiales parten de hueso marfil.
 // El cartílago y ligamento se detectan por tamaño relativo.
@@ -63,8 +86,9 @@ const baseLigament = () => new THREE.MeshStandardMaterial({
 });
 
 /* ── Escena 3D con GLB ────────────────────────────── */
-function KneeModel({ progressRef }: { progressRef: { current: number } }) {
+function KneeModel({ wrapperRef }: { wrapperRef: React.RefObject<HTMLDivElement> }) {
   const { scene } = useGLTF('/models/knee.glb');
+  const viewport  = useThree(s => s.viewport);
   const groupRef  = useRef<THREE.Group>(null);
   const keyRef    = useRef<THREE.PointLight>(null);
   const fillRef   = useRef<THREE.PointLight>(null);
@@ -72,6 +96,10 @@ function KneeModel({ progressRef }: { progressRef: { current: number } }) {
   const cartilageMeshesRef = useRef<THREE.Mesh[]>([]);
   const ligamentMeshesRef = useRef<THREE.Mesh[]>([]);
   const midKeyColorRef = useRef(new THREE.Color());
+  // Valores amortiguados: el modelo persigue al scroll con inercia en vez de seguirlo 1:1
+  const smoothPRef    = useRef(0);  // progreso dentro de la sección de anatomía
+  const smoothInRef   = useRef(0);  // presencia en la sección (0 fuera → 1 dentro)
+  const smoothPageRef = useRef(0);  // progreso de scroll de toda la página
 
   /* Clasificar y aplicar materiales al montar */
   useLayoutEffect(() => {
@@ -117,24 +145,86 @@ function KneeModel({ progressRef }: { progressRef: { current: number } }) {
     const center = box.getCenter(new THREE.Vector3());
     const sizeV  = box.getSize(new THREE.Vector3());
     const maxSide = Math.max(sizeV.x, sizeV.y, sizeV.z);
+
+    /* Vector radial de cada pieza (desde el centro del modelo) para la vista
+       explosionada: las capas se separan a lo largo de él y vuelven a ensamblarse */
+    meshes.forEach(m => {
+      const c = new THREE.Box3().setFromObject(m).getCenter(new THREE.Vector3());
+      m.userData.orig   = m.position.clone();
+      m.userData.radial = c.sub(center);
+    });
+
     scene.position.sub(center);
     scene.scale.setScalar(5.2 / maxSide);
   }, [scene]);
 
   useFrame(() => {
-    const p = progressRef.current;
+    /* Presencia en la sección de anatomía: 0 fuera → 1 con la sección fijada */
+    const vh = window.innerHeight;
+    let inTarget = 0;
+    const el = anatomyShared.sectionEl;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const approach = clamp01((vh - rect.top) / vh);
+      const leaveP   = clamp01(1 - rect.bottom / vh);
+      inTarget = approach * (1 - leaveP);
+    }
+    const maxScroll = document.documentElement.scrollHeight - vh;
+    const pageTarget = maxScroll > 0 ? clamp01(window.scrollY / maxScroll) : 0;
+
+    /* Amortiguación: perseguir los objetivos y seguir renderizando hasta asentarse */
+    const pTarget = anatomyShared.progress;
+    const p   = smoothPRef.current    + (pTarget    - smoothPRef.current)    * 0.14;
+    const inS = smoothInRef.current   + (inTarget   - smoothInRef.current)   * 0.14;
+    const pgP = smoothPageRef.current + (pageTarget - smoothPageRef.current) * 0.14;
+    smoothPRef.current = p; smoothInRef.current = inS; smoothPageRef.current = pgP;
+    if (Math.abs(pTarget - p) > 0.0005 || Math.abs(inTarget - inS) > 0.0005 || Math.abs(pageTarget - pgP) > 0.0005)
+      invalidate();
+
+    /* Opacidad del lienzo: protagonista en la sección, presencia sutil fuera */
+    if (wrapperRef.current)
+      wrapperRef.current.style.opacity = (0.4 + 0.6 * inS).toFixed(3);
+
     if (!groupRef.current) return;
     const g = groupRef.current;
 
-    /* Rotación por acto — empieza de frente (y=0) */
-    g.rotation.y = keyed(p, [[0,0],[0.2,0.5],[0.4,1.4],[0.6,2.4],[0.8,Math.PI*1.45],[1,Math.PI*1.65]]);
-    g.rotation.x = keyed(p, [[0,-0.05],[0.4,0],[0.8,0.06],[1,0.06]]);
+    /* Fuera de la sección: costado derecho, pequeño (sin salirse en móvil) */
+    const sideX = Math.min(2.3, viewport.width * 0.30);
+    g.position.x = sideX  * (1 - inS);
+    g.position.y = -0.15  * (1 - inS);
 
-    /* Escala: zoom sutil en acto 2, dolly-out final */
-    g.scale.setScalar(keyed(p, [[0,0.90],[0.2,1.05],[0.4,1.0],[0.6,0.97],[0.8,0.88],[1,0.70]]));
+    if (REDUCED_MOTION) {
+      g.rotation.set(-0.05, 0.6, 0);
+      g.scale.setScalar(0.52 + (0.9 - 0.52) * inS);
+      return;
+    }
+
+    /* Rotación: fuera de la sección gira con el scroll de página;
+       dentro, la coreografía por actos toma el control */
+    const actRotY = keyed(p, [[0,0],[0.2,0.5],[0.4,1.4],[0.6,2.4],[0.8,Math.PI*1.45],[1,Math.PI*1.65]]);
+    const pageRotY = pgP * Math.PI * 4;
+    g.rotation.y = pageRotY + (actRotY - pageRotY) * inS;
+    const actRotX = keyed(p, [[0,-0.05],[0.4,0],[0.8,0.06],[1,0.06]]);
+    g.rotation.x = 0.06 + (actRotX - 0.06) * inS;
+
+    /* Escala: zoom sutil en acto 2, dolly-out final; reducido fuera de la sección */
+    const actScale = keyed(p, [[0,0.90],[0.2,1.05],[0.4,1.0],[0.6,0.97],[0.8,0.88],[1,0.70]]);
+    g.scale.setScalar(0.52 + (actScale - 0.52) * inS);
+
+    /* Vista explosionada: cada capa se separa radialmente en los actos 2-3
+       y se reensambla hacia el acto 4 (efecto "despliegue anatómico") */
+    const exBone = 0.10 * keyed(p, [[0.18,0],[0.34,1],[0.58,1],[0.72,0]]);
+    const exCart = 0.38 * keyed(p, [[0.18,0],[0.30,1],[0.50,1],[0.64,0]]);
+    const exLiga = 0.60 * keyed(p, [[0.38,0],[0.50,1],[0.62,1],[0.74,0]]);
+    const explode = (m: THREE.Mesh, amount: number) => {
+      const orig   = m.userData.orig   as THREE.Vector3 | undefined;
+      const radial = m.userData.radial as THREE.Vector3 | undefined;
+      if (orig && radial) m.position.copy(orig).addScaledVector(radial, amount);
+    };
 
     /* Efectos de material por acto */
     for (const m of cartilageMeshesRef.current) {
+      explode(m, exCart);
       const mat = m.material as THREE.MeshStandardMaterial | undefined;
       if (!mat) continue;
       /* Act 2: cartílagos brillan teal */
@@ -143,14 +233,16 @@ function KneeModel({ progressRef }: { progressRef: { current: number } }) {
     }
 
     for (const m of ligamentMeshesRef.current) {
+      explode(m, exLiga);
       const mat = m.material as THREE.MeshStandardMaterial | undefined;
       if (!mat) continue;
       /* Act 2-3: ligamentos con glow */
       mat.emissiveIntensity = 0.45 * smooth(p, 0.22, 0.32) * (1 - smooth(p, 0.50, 0.60));
     }
 
-    const toV = smooth(p, 0.60, 0.74);
+    const toV = smooth(p, 0.60, 0.74) * inS;
     for (const m of boneMeshesRef.current) {
+      explode(m, exBone);
       const mat = m.material as THREE.MeshStandardMaterial | undefined;
       if (!mat) continue;
       /* Act 4: hueso con tinte violeta */
@@ -160,7 +252,7 @@ function KneeModel({ progressRef }: { progressRef: { current: number } }) {
     /* Luz key: blanco cálido → teal sutil → violeta en acto 4 */
     if (keyRef.current) {
       const toT = smooth(p, 0.10, 0.30); // blanco → teal suave
-      const toViolet = smooth(p, 0.58, 0.72); // teal → violeta
+      const toViolet = smooth(p, 0.58, 0.72) * inS; // teal → violeta (solo dentro de la sección)
       const midColor = midKeyColorRef.current.copy(WARM_WHITE).lerp(TEAL_COLOR, toT * 0.45);
       keyRef.current.color.copy(midColor).lerp(VIOLET_COLOR, toViolet);
       keyRef.current.intensity = 2.2 + 1.2 * smooth(p, 0.60, 0.72) * (1 - smooth(p, 0.82, 0.94));
@@ -188,6 +280,42 @@ function KneeFallback() {
       <sphereGeometry args={[0.4, 12, 8]} />
       <meshStandardMaterial color={TEAL} wireframe />
     </mesh>
+  );
+}
+
+/* ── Lienzo global fijo ───────────────────────────────
+   Se monta UNA vez en App, detrás del contenido (zIndex 0,
+   pointer-events none). El modelo acompaña todo el scroll. */
+export function AnatomyGlobalCanvas() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Con frameloop="demand" hay que pedir frame en cada scroll de la página
+  useEffect(() => {
+    const onScroll = () => invalidate();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
+
+  return (
+    <div ref={wrapperRef} aria-hidden="true"
+      style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.4 }}>
+      <Canvas
+        frameloop="demand"
+        dpr={[1, 1.25]}
+        camera={{ position: [0, 0, 7], fov: 36 }}
+        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+        onCreated={({ invalidate }) => invalidate()}
+        style={{ position: 'absolute', inset: 0 }}
+      >
+        <Suspense fallback={<KneeFallback />}>
+          <KneeModel wrapperRef={wrapperRef} />
+        </Suspense>
+      </Canvas>
+    </div>
   );
 }
 
@@ -222,30 +350,17 @@ const subSt: React.CSSProperties = {
 /* ── Componente principal ─────────────────────────── */
 export function AnatomyScrollExperience() {
   const sectionRef    = useRef<HTMLElement>(null);
-  const progressRef   = useRef(0);
   const actRefs       = useRef<(HTMLDivElement | null)[]>([]);
   const bgRefs        = useRef<(HTMLDivElement | null)[]>([]);
   const railFillRef   = useRef<HTMLDivElement>(null);
   const railRefs      = useRef<(HTMLSpanElement | null)[]>([]);
   const hintRef       = useRef<HTMLDivElement>(null);
   const metricValRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const [inView, setInView] = useState(false);
 
-  // Montar el Canvas una sola vez — nunca desmontarlo (evita desaparecer al volver a scrollear)
+  // Registrar la sección para que el lienzo global sepa dónde centrar el modelo
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          io.disconnect(); // latch: una vez montado, nunca se desmonta
-        }
-      },
-      { rootMargin: '300px 0px' }
-    );
-    io.observe(el);
-    return () => io.disconnect();
+    anatomyShared.sectionEl = sectionRef.current;
+    return () => { anatomyShared.sectionEl = null; };
   }, []);
 
   useLayoutEffect(() => {
@@ -279,7 +394,7 @@ export function AnatomyScrollExperience() {
           start: 'top top', end: 'bottom bottom',
           scrub: 0.55,
           onUpdate: self => {
-            progressRef.current = self.progress;
+            anatomyShared.progress = self.progress;
             invalidate();
             const idx = Math.min(4, Math.floor(self.progress * 5));
             railRefs.current.forEach((r, i) => {
@@ -350,33 +465,15 @@ export function AnatomyScrollExperience() {
     <section
       ref={sectionRef}
       aria-label="Recorrido anatómico interactivo"
-      style={{ height: '500vh', position: 'relative', background: BASE }}
+      style={{ height: '500vh', position: 'relative', background: 'transparent' }}
     >
-      <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', background: BASE }}>
+      <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', background: 'transparent' }}>
 
-        {/* Fondos por acto */}
+        {/* Fondos por acto (el modelo 3D vive en el lienzo global, detrás) */}
         {BGS.map((bg, i) => (
           <div key={i} ref={el => (bgRefs.current[i] = el)} aria-hidden="true"
             style={{ position: 'absolute', inset: 0, background: bg, opacity: i === 0 ? 1 : 0 }} />
         ))}
-
-        {/* Canvas 3D — se monta una sola vez y permanece */}
-        <div style={{ position: 'absolute', inset: 0 }}>
-          {inView && (
-            <Canvas
-              frameloop="demand"
-              dpr={[1, 1.25]}
-              camera={{ position: [0, 0, 7], fov: 36 }}
-              gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-              onCreated={({ invalidate }) => invalidate()}
-              style={{ position: 'absolute', inset: 0 }}
-            >
-              <Suspense fallback={<KneeFallback />}>
-                <KneeModel progressRef={progressRef} />
-              </Suspense>
-            </Canvas>
-          )}
-        </div>
 
         {/* Actos 1–3 */}
         {acts123.map((act, i) => (

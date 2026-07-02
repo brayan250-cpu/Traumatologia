@@ -18,6 +18,9 @@ const anatomyImport = import('./components/AnatomyScrollExperience');
 const AnatomyScrollExperience = lazy(() =>
   anatomyImport.then(m => ({ default: m.AnatomyScrollExperience }))
 );
+const AnatomyGlobalCanvas = lazy(() =>
+  anatomyImport.then(m => ({ default: m.AnatomyGlobalCanvas }))
+);
 import { AnimatedBackground } from './components/AnimatedBackground';
 const ScrollStory = lazy(() =>
   import('./components/ScrollStory').then(m => ({ default: m.ScrollStory }))
@@ -296,6 +299,13 @@ export function App() {
       {/* Canvas animated background */}
       <AnimatedBackground scrollProgressRef={scrollProgressRef} />
 
+      {/* Modelo 3D persistente — acompaña el scroll durante toda la página */}
+      {loadAnatomy && (
+        <Suspense fallback={null}>
+          <AnatomyGlobalCanvas />
+        </Suspense>
+      )}
+
       {/* Custom cursor follower */}
       {loadCursorFollower && (
         <Suspense fallback={null}>
@@ -400,11 +410,11 @@ export function App() {
         <StatsBand />
         <div ref={anatomySentinelRef}>
           {loadAnatomy ? (
-            <Suspense fallback={<div style={{ height: '500vh', background: '#070B1A' }} />}>
+            <Suspense fallback={<div style={{ height: '500vh', background: 'transparent' }} />}>
               <AnatomyScrollExperience />
             </Suspense>
           ) : (
-            <div style={{ height: '500vh', background: '#070B1A' }} />
+            <div style={{ height: '500vh', background: 'transparent' }} />
           )}
         </div>
 
