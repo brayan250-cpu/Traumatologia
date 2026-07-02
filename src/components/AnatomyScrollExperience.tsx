@@ -59,15 +59,7 @@ const anatomyShared = {
 const REDUCED_MOTION = typeof window !== 'undefined'
   && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ── Perfil móvil (mismo criterio pointer:coarse que App) ──
-   Menos resolución, damping que se asienta antes (menos frames por
-   scroll) y modelo más discreto para no estorbar la lectura. */
-const IS_COARSE = typeof window !== 'undefined'
-  && window.matchMedia('(pointer: coarse)').matches;
-const DAMP   = IS_COARSE ? 0.18 : 0.14; // factor de inercia por frame
-const OUT_OP = IS_COARSE ? 0.26 : 0.40; // opacidad del lienzo fuera de la sección
-const IN_OP  = IS_COARSE ? 0.88 : 1;    // opacidad dentro (móvil: texto centrado encima)
-const OUT_SC = IS_COARSE ? 0.38 : 0.52; // escala del modelo fuera de la sección
+
 
 /* ── Materiales médicos ───────────────────────────── */
 // Todos los materiales parten de hueso marfil.
