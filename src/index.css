@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mono-mc {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
 @layer base {
   html {
     font-family: 'Public Sans', system-ui, sans-serif;
@@ -82,4 +91,89 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ── Marquee ─────────────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+  will-change: transform;
+}
+.animate-marquee-reverse {
+  animation: marquee 36s linear infinite reverse;
+  will-change: transform;
+}
+
+/* ── Gradient text ───────────────────────────────────────────── */
+.gradient-text-hero {
+  background: linear-gradient(135deg, #ffffff 0%, #b2f5e4 40%, #f5c87a 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-text-accent {
+  background: linear-gradient(135deg, #15cfb0 0%, #6c63ff 50%, #ff6b9d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Shimmer effect ──────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.shimmer-text {
+  background: linear-gradient(90deg, rgba(255,255,255,.4) 0%, #fff 40%, rgba(255,255,255,.4) 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ── Glow utilities ──────────────────────────────────────────── */
+.glow-teal  { box-shadow: 0 0 40px rgba(15,217,160,.3), 0 0 80px rgba(15,217,160,.1); }
+.glow-amber { box-shadow: 0 0 40px rgba(201,122,61,.35), 0 0 80px rgba(201,122,61,.12); }
+.glow-violet{ box-shadow: 0 0 40px rgba(108,99,255,.3), 0 0 80px rgba(108,99,255,.1); }
+
+/* ── Gradient border card ────────────────────────────────────── */
+.gradient-border {
+  position: relative;
+  background: rgba(255,255,255,.04);
+  border-radius: 20px;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(15,217,160,.4), rgba(108,99,255,.3), rgba(201,122,61,.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ── Aurora pulse ────────────────────────────────────────────── */
+@keyframes aurora-pulse {
+  0%, 100% { opacity: .6; transform: scale(1) rotate(0deg); }
+  33%       { opacity: .9; transform: scale(1.08) rotate(2deg); }
+  66%       { opacity: .5; transform: scale(.95) rotate(-2deg); }
+}
+
+/* ── Noise overlay ───────────────────────────────────────────── */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: .028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
 }

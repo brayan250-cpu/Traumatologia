@@ -32,12 +32,13 @@ export function CalendarAndSlots({
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-[#14201D] mb-2">Selecciona fecha y hora</h2>
-          <p className="text-[#14201D]/70">Los días en gris no tienen disponibles</p>
+          <h2 className="text-2xl font-bold mb-1" style={{ color: '#fff', letterSpacing: '-.02em' }}>Selecciona fecha y hora</h2>
+          <p style={{ color: 'rgba(255,255,255,.5)', fontSize: '14px' }}>Los días en gris no tienen disponibles</p>
         </div>
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-[#0F5E52] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F5E52] focus-visible:ring-offset-2 rounded"
+          className="flex items-center gap-2 font-medium"
+          style={{ color: '#00e6b4', background: 'none', border: 'none', cursor: 'pointer' }}
         >
           <ChevronLeft className="w-4 h-4" />
           Volver
@@ -46,17 +47,17 @@ export function CalendarAndSlots({
 
       {isLoadingAvailability ? (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0F5E52]"></div>
-          <span className="ml-3 text-[#14201D]/70">Cargando disponibilidad...</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00e6b4]"></div>
+          <span className="ml-3" style={{ color: 'rgba(255,255,255,.5)' }}>Cargando disponibilidad...</span>
         </div>
       ) : (
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Calendar Grid */}
-          <div className="bg-white rounded-xl p-6 border border-[#0F5E52]/10">
-            <h3 className="text-lg font-semibold text-[#14201D] mb-4">Calendario</h3>
+          <div className="rounded-xl p-5" style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)' }}>
+            <h3 className="text-lg font-bold mb-4" style={{ color: '#fff' }}>Calendario</h3>
             <div className="grid grid-cols-7 gap-2">
               {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
-                <div key={day} className="text-center text-xs font-medium text-[#14201D]/50 py-2">
+                <div key={day} className="text-center text-xs font-medium py-2" style={{ color: 'rgba(255,255,255,.35)' }}>
                   {day}
                 </div>
               ))}
@@ -65,33 +66,44 @@ export function CalendarAndSlots({
                   key={day.date}
                   onClick={() => day.hasSlots && onSelectDate(day.date)}
                   disabled={!day.hasSlots}
-                  className={`aspect-square rounded-lg flex flex-col items-center justify-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F5E52] focus-visible:ring-offset-2 ${
-                    selectedDate === day.date
-                      ? 'bg-[#0F5E52] text-white shadow-md'
+                  style={{
+                    aspectRatio: '1',
+                    borderRadius: '10px',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    border: 'none', cursor: day.hasSlots ? 'pointer' : 'not-allowed',
+                    transition: 'all .2s',
+                    background: selectedDate === day.date
+                      ? '#00e6b4'
                       : day.hasSlots
-                      ? 'bg-[#F7F8F7] hover:bg-[#0F5E52]/10 text-[#14201D]'
-                      : 'bg-gray-100 text-[#14201D]/30 cursor-not-allowed'
-                  }`}
+                      ? 'rgba(255,255,255,.07)'
+                      : 'rgba(255,255,255,.02)',
+                    color: selectedDate === day.date
+                      ? '#020d18'
+                      : day.hasSlots
+                      ? '#fff'
+                      : 'rgba(255,255,255,.2)',
+                    fontWeight: 500,
+                  }}
                   aria-pressed={selectedDate === day.date}
                   aria-disabled={!day.hasSlots}
                 >
-                  <span className="text-xs font-medium">{day.dayOfWeek}</span>
-                  <span className="text-lg font-semibold">{day.dayNumber}</span>
+                  <span style={{ fontSize: '11px' }}>{day.dayOfWeek}</span>
+                  <span style={{ fontSize: '17px', fontWeight: 700 }}>{day.dayNumber}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Time Slots */}
-          <div className="bg-white rounded-xl p-6 border border-[#0F5E52]/10">
-            <h3 className="text-lg font-semibold text-[#14201D] mb-4">Horarios disponibles</h3>
+          <div className="rounded-xl p-5" style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)' }}>
+            <h3 className="text-lg font-bold mb-4" style={{ color: '#fff' }}>Horarios disponibles</h3>
 
             {!selectedDate ? (
-              <div className="text-center py-8 text-[#14201D]/50">
+              <div className="text-center py-8" style={{ color: 'rgba(255,255,255,.35)' }}>
                 <p>Selecciona una fecha para ver los horarios</p>
               </div>
             ) : !selectedDayAvailability?.hasSlots ? (
-              <div className="text-center py-8 text-[#14201D]/50">
+              <div className="text-center py-8" style={{ color: 'rgba(255,255,255,.35)' }}>
                 <p>No hay horarios disponibles para este día</p>
               </div>
             ) : (
@@ -99,7 +111,7 @@ export function CalendarAndSlots({
                 {/* Morning slots */}
                 {morningSlots.length > 0 && (
                   <div>
-                    <div className="flex items-center gap-2 mb-3 text-[#14201D]/70">
+                    <div className="flex items-center gap-2 mb-3" style={{ color: 'rgba(255,255,255,.55)' }}>
                       <Sun className="w-4 h-4" />
                       <span className="text-sm font-medium">Mañana</span>
                     </div>
@@ -109,13 +121,16 @@ export function CalendarAndSlots({
                           key={slot.id}
                           onClick={() => slot.available && onSelectSlot(slot)}
                           disabled={!slot.available || selectedSlot?.id === slot.id}
-                          className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F5E52] focus-visible:ring-offset-2 ${
-                            selectedSlot?.id === slot.id
-                              ? 'bg-[#0F5E52] text-white shadow-md'
-                              : slot.available
-                              ? 'bg-[#F7F8F7] hover:bg-[#0F5E52]/10 text-[#14201D] border border-[#0F5E52]/20'
-                              : 'bg-gray-100 text-[#14201D]/30 cursor-not-allowed line-through'
-                          }`}
+                          style={{
+                            padding: '8px 6px', borderRadius: '8px', fontSize: '13px', fontWeight: 500,
+                            border: selectedSlot?.id === slot.id ? 'none' : '1px solid rgba(255,255,255,.12)',
+                            cursor: slot.available ? 'pointer' : 'not-allowed', transition: 'all .2s',
+                            background: selectedSlot?.id === slot.id ? '#00e6b4'
+                              : slot.available ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.02)',
+                            color: selectedSlot?.id === slot.id ? '#020d18'
+                              : slot.available ? '#fff' : 'rgba(255,255,255,.2)',
+                            textDecoration: slot.available ? 'none' : 'line-through',
+                          }}
                           aria-pressed={selectedSlot?.id === slot.id}
                         >
                           {slot.time}
@@ -128,7 +143,7 @@ export function CalendarAndSlots({
                 {/* Afternoon slots */}
                 {afternoonSlots.length > 0 && (
                   <div>
-                    <div className="flex items-center gap-2 mb-3 text-[#14201D]/70">
+                    <div className="flex items-center gap-2 mb-3" style={{ color: 'rgba(255,255,255,.55)' }}>
                       <Moon className="w-4 h-4" />
                       <span className="text-sm font-medium">Tarde</span>
                     </div>
@@ -138,13 +153,16 @@ export function CalendarAndSlots({
                           key={slot.id}
                           onClick={() => slot.available && onSelectSlot(slot)}
                           disabled={!slot.available || selectedSlot?.id === slot.id}
-                          className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F5E52] focus-visible:ring-offset-2 ${
-                            selectedSlot?.id === slot.id
-                              ? 'bg-[#0F5E52] text-white shadow-md'
-                              : slot.available
-                              ? 'bg-[#F7F8F7] hover:bg-[#0F5E52]/10 text-[#14201D] border border-[#0F5E52]/20'
-                              : 'bg-gray-100 text-[#14201D]/30 cursor-not-allowed line-through'
-                          }`}
+                          style={{
+                            padding: '8px 6px', borderRadius: '8px', fontSize: '13px', fontWeight: 500,
+                            border: selectedSlot?.id === slot.id ? 'none' : '1px solid rgba(255,255,255,.12)',
+                            cursor: slot.available ? 'pointer' : 'not-allowed', transition: 'all .2s',
+                            background: selectedSlot?.id === slot.id ? '#00e6b4'
+                              : slot.available ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.02)',
+                            color: selectedSlot?.id === slot.id ? '#020d18'
+                              : slot.available ? '#fff' : 'rgba(255,255,255,.2)',
+                            textDecoration: slot.available ? 'none' : 'line-through',
+                          }}
                           aria-pressed={selectedSlot?.id === slot.id}
                         >
                           {slot.time}
@@ -164,7 +182,8 @@ export function CalendarAndSlots({
         <div className="flex justify-end">
           <button
             onClick={onContinue}
-            className="flex items-center gap-2 px-6 py-3 bg-[#0F5E52] text-white rounded-lg font-medium hover:bg-[#0F5E52]/90 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F5E52] focus-visible:ring-offset-2"
+            className="flex items-center gap-2 font-semibold transition-all hover:brightness-110"
+            style={{ padding: '14px 32px', borderRadius: '12px', background: 'linear-gradient(135deg,#00e6b4,#6c63ff)', color: '#020d18', fontSize: '15px', border: 'none', cursor: 'pointer', boxShadow: '0 16px 40px -12px rgba(0,230,180,.4)' }}
           >
             Continuar
             <ChevronRight className="w-4 h-4" />

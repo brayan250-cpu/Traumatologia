@@ -189,6 +189,11 @@ export function useBooking() {
     dispatch({ type: 'GO_TO_STEP', payload: 'patient' });
   }, []);
 
+  const goBack = useCallback(() => {
+    if (state.step === 'calendar') dispatch({ type: 'GO_TO_STEP', payload: 'specialty' });
+    else if (state.step === 'patient') dispatch({ type: 'GO_TO_STEP', payload: 'calendar' });
+  }, [state.step]);
+
   const setPatientData = useCallback((data: PatientFormData) => {
     dispatch({ type: 'SET_PATIENT_DATA', payload: data });
   }, []);
@@ -247,6 +252,7 @@ export function useBooking() {
       selectDate,
       selectSlot,
       goToPatientStep,
+      goBack,
       setPatientData,
       submitBookingRequest,
       retry,

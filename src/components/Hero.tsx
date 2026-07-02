@@ -1,97 +1,197 @@
-import { ArrowRight, Clock, Phone, MapPin } from 'lucide-react';
-import { clinicInfo } from '../services/api';
+import { useEffect, useRef } from 'react';
+import { ArrowRight, Clock, MapPin, Phone } from 'lucide-react';
+import { gsap } from 'gsap';
+import { clinicInfo, doctorInfo } from '../services/api';
 
 interface HeroProps {
   onBookAppointment: () => void;
 }
 
 export function Hero({ onBookAppointment }: HeroProps) {
+  const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Stagger reveal on mount — clip from below
+      gsap.fromTo('.hero-reveal', {
+        y: 60,
+        opacity: 0,
+        clipPath: 'inset(0 0 100% 0)',
+      }, {
+        y: 0,
+        opacity: 1,
+        clipPath: 'inset(0 0 0% 0)',
+        duration: 1.1,
+        ease: 'power3.out',
+        stagger: 0.12,
+        delay: 0.2,
+      });
+
+      gsap.fromTo('.hero-badge', {
+        opacity: 0,
+        y: -18,
+        scale: 0.94,
+      }, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.9,
+        ease: 'back.out(1.4)',
+        delay: 0.1,
+      });
+
+      gsap.fromTo('.hero-photo', {
+        opacity: 0,
+        x: 40,
+        scale: 0.96,
+      }, {
+        opacity: 1,
+        x: 0,
+        scale: 1,
+        duration: 1.3,
+        ease: 'power3.out',
+        delay: 0.35,
+      });
+
+      gsap.fromTo('.hero-scroll-cue', {
+        opacity: 0,
+        y: 12,
+      }, {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: 'power2.out',
+        delay: 1.2,
+      });
+    }, heroRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="relative bg-gradient-to-br from-[#0F5E52] via-[#0a4a40] to-[#063831] text-white overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-white rounded-full translate-x-1/4 translate-y-1/4"></div>
-      </div>
+    <section ref={heroRef} className="relative overflow-hidden text-white" style={{ background: 'transparent', padding: 'clamp(130px,13vw,180px) 0 0' }}>
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm backdrop-blur-sm">
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                Citas disponibles esta semana
-              </div>
+      {/* Decorative rings */}
+      <div className="absolute pointer-events-none" style={{ top: '-180px', left: '-140px', width: '580px', height: '580px', borderRadius: '50%', border: '1px solid rgba(0,230,180,.12)', background: 'radial-gradient(circle, rgba(0,230,180,.05) 0%, transparent 70%)' }} />
+      <div className="absolute pointer-events-none" style={{ bottom: '-200px', right: '-120px', width: '640px', height: '640px', borderRadius: '50%', border: '1px solid rgba(108,99,255,.1)', background: 'radial-gradient(circle, rgba(108,99,255,.06) 0%, transparent 70%)' }} />
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-                {clinicInfo.name}
-              </h1>
-              <p className="text-xl sm:text-2xl text-white/80 font-light">
-                {clinicInfo.tagline}
-              </p>
-              <p className="text-white/60 max-w-lg">
-                {clinicInfo.description}
-              </p>
-            </div>
+      <div className="relative max-w-6xl mx-auto px-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(330px,1fr))', gap: 'clamp(40px,5vw,72px)', alignItems: 'center' }}>
+        {/* Left Content */}
+        <div>
+          {/* Badge */}
+          <div className="hero-badge inline-flex items-center gap-3 px-4 py-2 rounded-full text-sm mb-6"
+            style={{ background: 'rgba(0,230,180,.08)', border: '1px solid rgba(0,230,180,.25)', backdropFilter: 'blur(8px)' }}>
+            <span className="relative flex items-center justify-center w-2 h-2">
+              <span className="animate-ping absolute w-2 h-2 rounded-full bg-emerald-400 opacity-60"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 flex-none"></span>
+            </span>
+            <span style={{ color: 'rgba(255,255,255,.85)' }}>Citas disponibles esta semana</span>
+          </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={onBookAppointment}
-                className="group flex items-center justify-center gap-3 px-8 py-4 bg-[#C97A3D] hover:bg-[#C97A3D]/90 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02]"
-              >
-                Reservar Cita
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <a
-                href={`tel:${clinicInfo.phone}`}
-                className="flex items-center justify-center gap-3 px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium rounded-xl transition-all duration-300 border border-white/20"
-              >
-                <Phone className="w-5 h-5" />
-                {clinicInfo.phone}
-              </a>
-            </div>
+          <div style={{ overflow: 'hidden' }}>
+            <p className="hero-reveal font-mono-mc text-xs tracking-widest uppercase mb-4" style={{ letterSpacing: '.24em', color: 'rgba(0,230,180,.7)' }}>
+              Traumatología &amp; Ortopedia · Lima
+            </p>
+          </div>
 
-            {/* Quick Info */}
-            <div className="flex flex-wrap gap-6 text-sm text-white/70">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span>{clinicInfo.hours}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                <span>{clinicInfo.address}</span>
-              </div>
+          {/* Gradient headline */}
+          <div style={{ overflow: 'hidden' }}>
+            <h1 className="hero-reveal font-extrabold leading-none mb-6 gradient-text-hero" style={{ fontSize: 'clamp(52px,7.5vw,100px)', letterSpacing: '-.04em', lineHeight: '0.92' }}>
+              Vuelve a<br />moverte<br />sin dolor.
+            </h1>
+          </div>
+
+          <div style={{ overflow: 'hidden' }}>
+            <p className="hero-reveal mb-8 font-light" style={{ fontSize: 'clamp(17px,1.5vw,20px)', lineHeight: '1.5', color: 'rgba(255,255,255,.68)', maxWidth: '30em' }}>
+              Especialistas en regeneración articular, cirugía mínimamente invasiva y recuperación funcional — con la precisión del Dr. Carlos Minda Rojas.
+            </p>
+          </div>
+
+          {/* CTAs */}
+          <div className="hero-reveal flex flex-wrap gap-4 mb-8">
+            <button
+              onClick={onBookAppointment}
+              className="inline-flex items-center gap-3 font-semibold text-white rounded-[14px] transition-all hover:-translate-y-0.5 hover:brightness-110"
+              style={{ padding: '16px 30px', background: 'linear-gradient(135deg, #00e6b4 0%, #6c63ff 100%)', fontSize: '16px', border: 'none', cursor: 'pointer', boxShadow: '0 20px 40px -16px rgba(0,230,180,.5)' }}
+            >
+              Reservar Cita
+              <ArrowRight className="w-5 h-5" />
+            </button>
+            <a
+              href={`tel:${clinicInfo.phone}`}
+              className="inline-flex items-center gap-3 font-medium text-white rounded-[14px] transition-all hover:bg-white/15"
+              style={{ padding: '16px 28px', background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.18)', fontSize: '16px', textDecoration: 'none', backdropFilter: 'blur(6px)' }}
+            >
+              <Phone className="w-5 h-5" />
+              {clinicInfo.phone}
+            </a>
+          </div>
+
+          <div className="hero-reveal flex flex-wrap gap-6 text-sm" style={{ color: 'rgba(255,255,255,.55)' }}>
+            <span className="flex items-center gap-2"><Clock className="w-4 h-4" />{clinicInfo.hours}</span>
+            <span className="flex items-center gap-2"><MapPin className="w-4 h-4" />{clinicInfo.address}</span>
+          </div>
+        </div>
+
+        {/* Right — Doctor photo */}
+        <div className="hero-photo relative justify-self-center w-full" style={{ maxWidth: '440px' }}>
+          {/* Glowing border frame */}
+          <div className="absolute inset-0 rounded-3xl pointer-events-none" style={{ background: 'linear-gradient(135deg, rgba(0,230,180,.4), rgba(108,99,255,.3), rgba(201,122,61,.3))', borderRadius: '28px', transform: 'scale(1.02)', filter: 'blur(12px)', zIndex: 0 }} />
+          <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: '4/5', boxShadow: '0 40px 80px -30px rgba(0,0,0,.7)', border: '1px solid rgba(255,255,255,.1)', zIndex: 1 }}>
+            <img src={doctorInfo.photo} alt={doctorInfo.name} className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg,transparent 50%,rgba(4,10,18,.7))' }} />
+          </div>
+
+          {/* Rating badge */}
+          <div className="absolute flex items-center gap-3 rounded-[15px]" style={{ top: '18px', left: '-14px', padding: '13px 17px', background: 'rgba(255,255,255,.95)', boxShadow: '0 20px 40px -14px rgba(0,0,0,.35)', backdropFilter: 'blur(8px)', zIndex: 2 }}>
+            <svg viewBox="0 0 24 24" fill="#f5b301" style={{ width: '16px', height: '16px' }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+            <div style={{ lineHeight: '1.1' }}>
+              <div className="font-extrabold text-[#14201D]" style={{ fontSize: '17px' }}>{doctorInfo.rating}</div>
+              <div style={{ fontSize: '11px', color: 'rgba(20,32,29,.5)' }}>{doctorInfo.reviews} reseñas</div>
             </div>
           </div>
 
-          {/* Right Stats */}
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/10 hover:bg-white/15 transition-colors">
-              <p className="text-5xl sm:text-6xl font-bold text-[#C97A3D]">{clinicInfo.patientsServed.toLocaleString()}+</p>
-              <p className="text-white/80 mt-2">Pacientes Atendidos</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/10 hover:bg-white/15 transition-colors">
-              <p className="text-5xl sm:text-6xl font-bold text-[#C97A3D]">{clinicInfo.surgeriesCompleted.toLocaleString()}+</p>
-              <p className="text-white/80 mt-2">Cirugías Exitosas</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/10 hover:bg-white/15 transition-colors">
-              <p className="text-5xl sm:text-6xl font-bold text-white">18+</p>
-              <p className="text-white/80 mt-2">Años de Experiencia</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/10 hover:bg-white/15 transition-colors">
-              <div className="flex items-center gap-1">
-                <p className="text-5xl sm:text-6xl font-bold text-white">4.9</p>
-                <svg className="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              </div>
-              <p className="text-white/80 mt-2">Calificación Promedio</p>
+          {/* Experience badge */}
+          <div className="absolute flex items-center gap-3 text-white rounded-[15px]" style={{ bottom: '20px', right: '-14px', background: 'linear-gradient(135deg,#6c63ff,#00e6b4)', padding: '15px 19px', boxShadow: '0 18px 40px -14px rgba(108,99,255,.7)', zIndex: 2 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}><circle cx="12" cy="8" r="6" /><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" /></svg>
+            <div style={{ lineHeight: '1.05' }}>
+              <div className="font-extrabold" style={{ fontSize: '24px' }}>18</div>
+              <div style={{ fontSize: '11px', opacity: '.85' }}>años de trayectoria</div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Scroll cue */}
+      <div className="hero-scroll-cue absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none select-none">
+        <span className="font-mono-mc" style={{ fontSize: '10px', letterSpacing: '.22em', color: 'rgba(255,255,255,.35)', textTransform: 'uppercase' }}>Scroll</span>
+        <svg width="24" height="34" viewBox="0 0 24 34" fill="none" style={{ opacity: 0.35 }}>
+          <rect x="1" y="1" width="22" height="32" rx="11" stroke="white" strokeWidth="1.5"/>
+          <circle cx="12" cy="10" r="3" fill="white" style={{ animation: 'scrollDot 1.8s ease-in-out infinite' }}/>
+        </svg>
+      </div>
+
+      {/* ── Marquee ticker ─────────────────────────────────────── */}
+      <div className="relative overflow-hidden mt-16 py-4" style={{ borderTop: '1px solid rgba(255,255,255,.07)', borderBottom: '1px solid rgba(255,255,255,.07)', background: 'rgba(0,0,0,.18)', backdropFilter: 'blur(4px)' }}>
+        <div className="animate-marquee flex whitespace-nowrap select-none">
+          {[...Array(2)].map((_, rep) => (
+            <span key={rep} className="flex items-center gap-0">
+              {['ARTROSCOPIA', 'REEMPLAZO ARTICULAR', 'TRAUMA DEPORTIVO', 'CIRUGÍA MÍNIMAMENTE INVASIVA', 'REHABILITACIÓN', '18 AÑOS DE EXPERIENCIA', 'DR. CARLOS MINDA', 'SAN ISIDRO · LIMA', 'RECUPERACIÓN FUNCIONAL', 'BIOMECÁNICA AVANZADA'].map((item, i) => (
+                <span key={i} className="inline-flex items-center gap-4 font-mono-mc font-medium uppercase" style={{ fontSize: '11px', letterSpacing: '.2em', color: 'rgba(255,255,255,.35)', padding: '0 24px' }}>
+                  {item}
+                  <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: i % 3 === 0 ? '#00e6b4' : i % 3 === 1 ? '#6c63ff' : '#C97A3D', flexShrink: 0, opacity: 0.7 }} />
+                </span>
+              ))}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes scrollDot {
+          0%,100% { transform: translateY(0); opacity: 1; }
+          60% { transform: translateY(10px); opacity: 0.3; }
+        }
+      `}</style>
     </section>
   );
 }

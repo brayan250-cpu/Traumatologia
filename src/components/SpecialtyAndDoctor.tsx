@@ -37,34 +37,42 @@ export function SpecialtyAndDoctor({
   onSelectDoctor,
 }: SpecialtyAndDoctorProps) {
   useEffect(() => {
-    if (selectedSpecialty && doctors.length > 0 && !selectedDoctor) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    // Solo para asegurar re-render al cambiar médicos disponibles
   }, [selectedSpecialty, doctors.length, selectedDoctor]);
 
   return (
     <div className="space-y-8">
       {/* Specialty Selection */}
       <div>
-        <h2 className="text-2xl font-semibold text-[#14201D] mb-2">Selecciona un servicio</h2>
-        <p className="text-[#14201D]/70 mb-6">Elige el tipo de consulta que necesitas</p>
+        <h2 className="text-2xl font-bold mb-1" style={{ color: '#fff', letterSpacing: '-.02em' }}>Selecciona un servicio</h2>
+        <p className="mb-6" style={{ color: 'rgba(255,255,255,.5)', fontSize: '14px' }}>Elige el tipo de consulta que necesitas</p>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {specialties.map((specialty) => (
             <button
               key={specialty.id}
               onClick={() => onSelectSpecialty(specialty)}
-              className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F5E52] focus-visible:ring-offset-2 ${
-                selectedSpecialty?.id === specialty.id
-                  ? 'border-[#0F5E52] bg-[#0F5E52]/5 shadow-sm'
-                  : 'border-transparent bg-white hover:border-[#0F5E52]/30 hover:bg-[#F7F8F7]'
-              }`}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                padding: '16px 12px', borderRadius: '14px',
+                border: selectedSpecialty?.id === specialty.id
+                  ? '2px solid #00e6b4'
+                  : '2px solid rgba(255,255,255,.1)',
+                background: selectedSpecialty?.id === specialty.id
+                  ? 'rgba(0,230,180,.1)'
+                  : 'rgba(255,255,255,.04)',
+                cursor: 'pointer', transition: 'all .2s',
+              }}
+              onMouseEnter={e => { if (selectedSpecialty?.id !== specialty.id) (e.currentTarget.style.borderColor = 'rgba(255,255,255,.2)'); }}
+              onMouseLeave={e => { if (selectedSpecialty?.id !== specialty.id) (e.currentTarget.style.borderColor = 'rgba(255,255,255,.1)'); }}
               aria-pressed={selectedSpecialty?.id === specialty.id}
             >
-              <span className={`text-[#0F5E52] ${selectedSpecialty?.id === specialty.id ? '' : 'opacity-70'}`}>
+              <span style={{ color: selectedSpecialty?.id === specialty.id ? '#00e6b4' : 'rgba(255,255,255,.6)' }}>
                 {iconMap[specialty.icon] || <Stethoscope className="w-5 h-5" />}
               </span>
-              <span className="text-sm font-medium text-[#14201D] text-center">{specialty.name}</span>
+              <span style={{ fontSize: '13px', fontWeight: 500, color: selectedSpecialty?.id === specialty.id ? '#fff' : 'rgba(255,255,255,.7)', textAlign: 'center' }}>
+                {specialty.name}
+              </span>
             </button>
           ))}
         </div>
@@ -73,23 +81,23 @@ export function SpecialtyAndDoctor({
       {/* Doctor Selection */}
       {selectedSpecialty && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <h3 className="text-xl font-semibold text-[#14201D] mb-4">
+          <h3 className="text-xl font-bold mb-4" style={{ color: '#fff' }}>
             Disponibilidad para {selectedSpecialty.name}
           </h3>
 
           {isLoadingDoctors ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0F5E52]"></div>
-              <span className="ml-3 text-[#14201D]/70">Cargando médicos...</span>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00e6b4]"></div>
+              <span className="ml-3" style={{ color: 'rgba(255,255,255,.5)' }}>Cargando médicos...</span>
             </div>
           ) : doctors.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-[#0F5E52]/10">
-              <p className="text-[#14201D]/70 mb-4">
+            <div className="text-center py-12 rounded-xl" style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.1)' }}>
+              <p style={{ color: 'rgba(255,255,255,.5)', marginBottom: '16px' }}>
                 No hay disponibilidad para este servicio esta semana
               </p>
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="text-[#0F5E52] font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F5E52] focus-visible:ring-offset-2 rounded"
+                style={{ color: '#00e6b4', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}
               >
                 Selecciona otro servicio
               </button>
@@ -100,30 +108,37 @@ export function SpecialtyAndDoctor({
                 <button
                   key={doctor.id}
                   onClick={() => onSelectDoctor(doctor)}
-                  className={`flex items-start gap-4 p-4 rounded-xl border-2 transition-all duration-200 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F5E52] focus-visible:ring-offset-2 ${
-                    selectedDoctor?.id === doctor.id
-                      ? 'border-[#0F5E52] bg-[#0F5E52]/5 shadow-sm'
-                      : 'border-transparent bg-white hover:border-[#0F5E52]/30 hover:shadow-sm'
-                  }`}
+                  style={{
+                    display: 'flex', alignItems: 'flex-start', gap: '16px',
+                    padding: '16px', borderRadius: '14px', textAlign: 'left',
+                    border: selectedDoctor?.id === doctor.id
+                      ? '2px solid #00e6b4'
+                      : '2px solid rgba(255,255,255,.1)',
+                    background: selectedDoctor?.id === doctor.id
+                      ? 'rgba(0,230,180,.08)'
+                      : 'rgba(255,255,255,.04)',
+                    cursor: 'pointer', transition: 'all .2s', width: '100%',
+                  }}
                   aria-pressed={selectedDoctor?.id === doctor.id}
                 >
                   <img
                     src={doctor.photo}
                     alt={doctor.name}
-                    className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                    className="rounded-lg object-cover flex-shrink-0"
+                    style={{ width: '64px', height: '64px' }}
                   />
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-[#14201D] truncate">{doctor.name}</h4>
-                    <p className="text-sm text-[#14201D]/70 mt-1">{doctor.credentials}</p>
-                    <div className="flex items-center gap-3 mt-2 text-xs">
-                      <span className="flex items-center gap-1 text-amber-600">
-                        <span className="font-medium">{doctor.rating}</span>
+                    <h4 style={{ fontWeight: 600, color: '#fff', marginBottom: '4px' }}>{doctor.name}</h4>
+                    <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.55)', marginBottom: '8px' }}>{doctor.credentials}</p>
+                    <div className="flex items-center gap-3" style={{ fontSize: '12px' }}>
+                      <span className="flex items-center gap-1" style={{ color: '#f5b301' }}>
+                        <span style={{ fontWeight: 600 }}>{doctor.rating}</span>
                         <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                       </span>
-                      <span className="text-[#14201D]/50">|</span>
-                      <span className="text-[#14201D]/60">{doctor.languages.join(', ')}</span>
+                      <span style={{ color: 'rgba(255,255,255,.2)' }}>|</span>
+                      <span style={{ color: 'rgba(255,255,255,.45)' }}>{doctor.languages.join(', ')}</span>
                     </div>
                   </div>
                 </button>

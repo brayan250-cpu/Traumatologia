@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      /* Fondo oscuro inmediato antes de que cargue CSS/React */
+      html, body { background: #030814; margin: 0; }
+    </style>
 
     <!-- Primary SEO -->
     <title>Minda Code - Centro de Traumatología y Ortopedia | Lima, Perú</title>
@@ -27,7 +31,12 @@
     <!-- Fonts: Public Sans (UI) + IBM Plex Mono (codes/ticket) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Preload crítico -->
+    <link rel="preload" href="/models/knee.glb" as="fetch" crossorigin="anonymous" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -51,6 +60,24 @@
     </script>
   </head>
   <body>
+    <!-- Intro overlay: cubre el arranque hasta que React monta -->
+    <div id="intro-overlay" style="position:fixed;inset:0;z-index:9999;background:#030814;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#00e6b4,#6c63ff);"></div>
+        <span style="font-family:system-ui,sans-serif;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35);">Cargando</span>
+      </div>
+    </div>
+    <script>
+      // Eliminar overlay suavemente una vez que la pagina este lista
+      window.addEventListener('load', function() {
+        var el = document.getElementById('intro-overlay');
+        if (!el) return;
+        setTimeout(function() {
+          el.style.opacity = '0';
+          setTimeout(function() { el.style.display = 'none'; }, 520);
+        }, 200);
+      });
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

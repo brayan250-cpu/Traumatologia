@@ -1,94 +1,135 @@
-import { Award, GraduationCap, Star, BadgeCheck } from 'lucide-react';
+﻿import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { doctorInfo } from '../services/api';
 
+gsap.registerPlugin(ScrollTrigger);
+
 export function DoctorProfile() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Left column reveal
+      gsap.fromTo('.doctor-left', {
+        x: -50, opacity: 0,
+      }, {
+        x: 0, opacity: 1,
+        duration: 1.1, ease: 'power3.out',
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
+      });
+      // Right column reveal
+      gsap.fromTo('.doctor-right', {
+        x: 50, opacity: 0,
+      }, {
+        x: 0, opacity: 1,
+        duration: 1.1, ease: 'power3.out', delay: 0.15,
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
+      });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="py-16 sm:py-24 bg-[#F7F8F7]" id="doctor">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Image */}
-          <div className="relative">
-            <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl">
+    <section ref={sectionRef} id="doctor" style={{ background: 'rgba(4,10,8,.82)', padding: 'clamp(72px,9vw,120px) 0', backdropFilter: 'blur(0px)' }}>
+      <div className="max-w-6xl mx-auto px-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 'clamp(36px,5vw,64px)' }}>
+          {/* Left â€” info */}
+          <div className="doctor-left">
+            <div className="inline-flex items-center gap-3 font-mono-mc font-medium uppercase mb-6" style={{ fontSize: '12px', letterSpacing: '.2em', color: '#4DCFB0' }}>
+              <span style={{ width: '22px', height: '1px', background: '#C97A3D' }} />
+              01 · El especialista
+            </div>
+
+            <div className="flex items-center gap-4 mb-5">
               <img
+loading="lazy" 
                 src={doctorInfo.photo}
                 alt={doctorInfo.name}
-                className="w-full h-full object-cover"
+                className="rounded-full object-cover flex-none"
+                style={{ width: '66px', height: '66px', border: '3px solid rgba(255,255,255,.2)', boxShadow: '0 6px 24px -8px rgba(0,0,0,.6)' }}
               />
-            </div>
-            {/* Floating Badge */}
-            <div className="absolute -bottom-4 -right-4 sm:-right-6 bg-white rounded-xl p-4 shadow-xl border border-[#0F5E52]/10">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-[#0F5E52] flex items-center justify-center">
-                  <Award className="w-6 h-6 text-white" />
+              <div>
+                <div className="flex items-center gap-2 font-semibold mb-1" style={{ color: '#4DCFB0', fontSize: '13px' }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: '15px', height: '15px' }}>
+                    <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+                    <path d="m9 12 2 2 4-4" />
+                  </svg>
+                  Especialista Certificado
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-[#14201D]">{doctorInfo.experience}</p>
-                  <p className="text-sm text-[#14201D]/60">de trayectoria</p>
-                </div>
+                <h2 className="font-extrabold leading-tight" style={{ margin: 0, fontSize: 'clamp(26px,3.4vw,38px)', letterSpacing: '-.025em', color: '#fff' }}>
+                  {doctorInfo.name}
+                </h2>
               </div>
+            </div>
+
+            <p style={{ fontSize: '16px', color: 'rgba(255,255,255,.65)', lineHeight: '1.6', maxWidth: '34em', margin: '0 0 22px' }}>
+              {doctorInfo.title}. Con 18 años de trayectoria, combina técnicas de cirugía mínimamente invasiva con un enfoque centrado en la recuperación funcional de cada paciente.
+            </p>
+
+            {/* Rating */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex gap-0.5" style={{ color: '#f5b301' }}>
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} viewBox="0 0 24 24" fill="currentColor" style={{ width: '19px', height: '19px' }}>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                ))}
+              </div>
+              <span className="font-bold text-white" style={{ fontSize: '15px' }}>{doctorInfo.rating}</span>
+              <span style={{ color: 'rgba(255,255,255,.45)', fontSize: '14px' }}>({doctorInfo.reviews} reseñas verificadas)</span>
+            </div>
+
+            {/* Specialties */}
+            <div className="font-semibold uppercase mb-3" style={{ fontSize: '13px', color: 'rgba(255,255,255,.4)', letterSpacing: '.08em' }}>
+              Áreas de especialización
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {doctorInfo.specialties.map((spec) => (
+                <span key={spec} className="font-medium" style={{ padding: '9px 16px', background: 'rgba(15,200,160,.14)', color: '#4DCFB0', border: '1px solid rgba(15,200,160,.22)', borderRadius: '999px', fontSize: '14px' }}>
+                  {spec}
+                </span>
+              ))}
             </div>
           </div>
 
-          {/* Content */}
-          <div className="space-y-6">
-            <div>
-              <p className="text-[#0F5E52] font-semibold mb-2 flex items-center gap-2">
-                <BadgeCheck className="w-5 h-5" />
-                Especialista Certificado
-              </p>
-              <h2 className="text-3xl sm:text-4xl font-bold text-[#14201D] mb-2">
-                {doctorInfo.name}
-              </h2>
-              <p className="text-lg text-[#14201D]/70">{doctorInfo.title}</p>
-            </div>
-
-            {/* Rating */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-5 h-5 ${i < Math.floor(doctorInfo.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-                  />
-                ))}
-              </div>
-              <span className="text-[#14201D] font-semibold">{doctorInfo.rating}</span>
-              <span className="text-[#14201D]/60">({doctorInfo.reviews} reseñas verificadas)</span>
-            </div>
-
-            {/* Credentials */}
-            <div className="bg-white rounded-xl p-6 border border-[#0F5E52]/10">
-              <h3 className="font-semibold text-[#14201D] mb-4 flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-[#0F5E52]" />
+          {/* Right â€” cards */}
+          <div className="doctor-right flex flex-col gap-5">
+            {/* Academic credentials */}
+            <div className="rounded-[20px]" style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', padding: '30px' }}>
+              <h3 className="flex items-center gap-3 font-bold mb-5" style={{ margin: '0 0 20px', fontSize: '17px', color: '#fff' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#4DCFB0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: '20px', height: '20px' }}>
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" />
+                </svg>
                 Formación Académica
               </h3>
-              <ul className="space-y-3">
-                {doctorInfo.credentials.map((cred, i) => (
-                  <li key={i} className="flex items-start gap-3 text-[#14201D]/80">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0F5E52] mt-2 flex-shrink-0"></span>
+              <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {doctorInfo.credentials.map((cred) => (
+                  <li key={cred} className="flex items-start gap-3" style={{ color: 'rgba(255,255,255,.7)', fontSize: '15px', lineHeight: '1.45' }}>
+                    <span className="flex-none rounded-full" style={{ width: '7px', height: '7px', background: '#4DCFB0', marginTop: '7px' }} />
                     {cred}
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Specialties */}
-            <div>
-              <h3 className="font-semibold text-[#14201D] mb-3">Áreas de Especialización</h3>
-              <div className="flex flex-wrap gap-2">
-                {doctorInfo.specialties.map((spec, i) => (
-                  <span
-                    key={i}
-                    className="px-4 py-2 bg-[#0F5E52]/10 text-[#0F5E52] rounded-full text-sm font-medium"
-                  >
-                    {spec}
-                  </span>
-                ))}
+            {/* Metrics card */}
+            <div className="text-white rounded-[20px]" style={{ background: 'linear-gradient(135deg,rgba(15,94,82,.7),rgba(10,74,64,.8))', border: '1px solid rgba(15,200,160,.2)', padding: '28px 30px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div>
+                <div className="font-extrabold" style={{ fontSize: '34px', letterSpacing: '-.03em' }}>+3,200</div>
+                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.65)', marginTop: '4px' }}>Cirugías realizadas</div>
+              </div>
+              <div>
+                <div className="font-extrabold" style={{ fontSize: '34px', letterSpacing: '-.03em', color: '#C97A3D' }}>98%</div>
+                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.65)', marginTop: '4px' }}>Recuperación exitosa</div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>
   );
 }
+
+

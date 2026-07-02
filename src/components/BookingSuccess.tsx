@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, Clock, User, MapPin, Check, ChevronDown, ChevronUp, CalendarPlus, Copy, RotateCcw } from 'lucide-react';
+import { Calendar, Clock, User, MapPin, Check, CalendarPlus, Copy, RotateCcw } from 'lucide-react';
 import type { BookingPayload, BookingResult } from '../types';
 import { insuranceProviders } from '../lib/validation';
 
@@ -11,7 +11,6 @@ interface BookingSuccessProps {
 }
 
 export function BookingSuccess({ result, payload, onReset }: BookingSuccessProps) {
-  const [showJSON, setShowJSON] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const displayDate = new Date(payload.date).toLocaleDateString('es-PE', {
@@ -164,33 +163,6 @@ export function BookingSuccess({ result, payload, onReset }: BookingSuccessProps
         <CalendarPlus className="w-5 h-5" />
         Agregar a Google Calendar
       </a>
-
-      {/* JSON Payload Collapsible */}
-      <div className="bg-white rounded-xl border border-[#0F5E52]/10 overflow-hidden">
-        <button
-          onClick={() => setShowJSON(!showJSON)}
-          className="w-full flex items-center justify-between px-6 py-4 text-[#14201D] hover:bg-[#F7F8F7] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F5E52] focus-visible:ring-inset"
-          aria-expanded={showJSON}
-        >
-          <span className="font-medium">Ver datos enviados (JSON)</span>
-          {showJSON ? (
-            <ChevronUp className="w-5 h-5 text-[#14201D]/60" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-[#14201D]/60" />
-          )}
-        </button>
-
-        {showJSON && (
-          <div className="px-6 pb-4">
-            <pre
-              className="bg-[#14201D] text-[#F7F8F7] p-4 rounded-lg overflow-x-auto text-sm leading-relaxed"
-              style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: '13px' }}
-            >
-              {JSON.stringify(payload, null, 2)}
-            </pre>
-          </div>
-        )}
-      </div>
 
       {/* Actions */}
       <div className="text-center">
