@@ -38,7 +38,7 @@ export function DoctorProfile() {
           <div className="doctor-left">
             <div className="inline-flex items-center gap-3 font-mono-mc font-medium uppercase mb-6" style={{ fontSize: '12px', letterSpacing: '.2em', color: '#93C5FD' }}>
               <span style={{ width: '22px', height: '1px', background: '#14B8A6' }} />
-              01 ∑ El especialista
+              01 ¬∑ El especialista
             </div>
 
             <div className="flex items-center gap-4 mb-5">
@@ -64,7 +64,7 @@ loading="lazy"
             </div>
 
             <p style={{ fontSize: '16px', color: 'rgba(255,255,255,.65)', lineHeight: '1.6', maxWidth: '34em', margin: '0 0 22px' }}>
-              {doctorInfo.title}. Con 18 aÒos de trayectoria, combina tÈcnicas de cirugÌa mÌnimamente invasiva con un enfoque centrado en la recuperaciÛn funcional de cada paciente.
+              Con 18 a√±os de trayectoria, combina t√©cnicas de cirug√≠a m√≠nimamente invasiva con un enfoque centrado en la recuperaci√≥n funcional de cada paciente.
             </p>
 
             {/* Rating */}
@@ -77,12 +77,12 @@ loading="lazy"
                 ))}
               </div>
               <span className="font-bold text-white" style={{ fontSize: '15px' }}>{doctorInfo.rating}</span>
-              <span style={{ color: 'rgba(255,255,255,.45)', fontSize: '14px' }}>({doctorInfo.reviews} reseÒas verificadas)</span>
+              <span style={{ color: 'rgba(255,255,255,.45)', fontSize: '14px' }}>({doctorInfo.reviews} rese√±as verificadas)</span>
             </div>
 
             {/* Specialties */}
             <div className="font-semibold uppercase mb-3" style={{ fontSize: '13px', color: 'rgba(255,255,255,.4)', letterSpacing: '.08em' }}>
-              ¡reas de especializaciÛn
+              √Åreas de especializaci√≥n
             </div>
             <div className="flex flex-wrap gap-2">
               {doctorInfo.specialties.map((spec) => (
@@ -101,7 +101,7 @@ loading="lazy"
                 <svg viewBox="0 0 24 24" fill="none" stroke="#93C5FD" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: '20px', height: '20px' }}>
                   <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" />
                 </svg>
-                FormaciÛn AcadÈmica
+                Formaci√≥n Acad√©mica
               </h3>
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 {doctorInfo.credentials.map((cred) => (
@@ -117,11 +117,11 @@ loading="lazy"
             <div className="text-white rounded-[20px]" style={{ background: 'linear-gradient(135deg,rgba(15,94,82,.7),rgba(10,74,64,.8))', border: '1px solid rgba(15,200,160,.2)', padding: '28px 30px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div>
                 <div className="font-extrabold" style={{ fontSize: '34px', letterSpacing: '-.03em' }}>+3,200</div>
-                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.65)', marginTop: '4px' }}>CirugÌas realizadas</div>
+                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.65)', marginTop: '4px' }}>Cirug√≠as realizadas</div>
               </div>
               <div>
                 <div className="font-extrabold" style={{ fontSize: '34px', letterSpacing: '-.03em', color: '#14B8A6' }}>98%</div>
-                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.65)', marginTop: '4px' }}>RecuperaciÛn exitosa</div>
+                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.65)', marginTop: '4px' }}>Recuperaci√≥n exitosa</div>
               </div>
             </div>
           </div>

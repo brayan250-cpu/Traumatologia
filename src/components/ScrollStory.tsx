@@ -3,9 +3,9 @@ import gsap from 'gsap';
 
 const ACTS = [
   {
-    tag: 'DIAGNOSTICO',
+    tag: 'DIAGNÓSTICO',
     title: 'Todo empieza con una consulta',
-    body: 'El Dr. Minda evalua tu caso con imagenes de ultima generacion. Una radiografia revela lo que el ojo no ve y define el mejor camino.',
+    body: 'El Dr. Minda evalúa tu caso con imágenes de última generación. Una radiografía revela lo que el ojo no ve y define el mejor camino.',
     icon: (
       <svg viewBox="0 0 80 80" width="80" height="80" fill="none">
         <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="2" opacity=".3" />
@@ -22,9 +22,9 @@ const ACTS = [
     bg: 'radial-gradient(ellipse at 60% 40%, rgba(15,94,82,.18) 0%, transparent 65%)',
   },
   {
-    tag: 'PLANIFICACION',
-    title: 'Cirugia minimamente invasiva',
-    body: 'Con artroscopia de ultima generacion, accedemos a la articulacion a traves de incisiones de 5 mm. Sin grandes cortes. Sin grandes cicatrices.',
+    tag: 'PLANIFICACIÓN',
+    title: 'Cirugía mínimamente invasiva',
+    body: 'Con artroscopia de última generación, accedemos a la articulación a través de incisiones de 5 mm. Sin grandes cortes. Sin grandes cicatrices.',
     icon: (
       <svg viewBox="0 0 80 80" width="80" height="80" fill="none">
         <rect x="8" y="28" width="64" height="36" rx="8" stroke="currentColor" strokeWidth="2" opacity=".4" />
@@ -40,9 +40,9 @@ const ACTS = [
     bg: 'radial-gradient(ellipse at 40% 60%, rgba(20,184,166,.18) 0%, transparent 65%)',
   },
   {
-    tag: 'INTERVENCION',
-    title: 'Precision en cada movimiento',
-    body: 'La tecnologia de imagen intraoperatoria guia cada gesto. El resultado: menos dolor, menos sangrado, recuperacion en semanas, no meses.',
+    tag: 'INTERVENCIÓN',
+    title: 'Precisión en cada movimiento',
+    body: 'La tecnología de imagen intraoperatoria guía cada gesto. El resultado: menos dolor, menos sangrado, recuperación en semanas, no meses.',
     icon: (
       <svg viewBox="0 0 80 80" width="80" height="80" fill="none">
         <path d="M16 64 L38 20 L62 64" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity=".5" />
@@ -57,9 +57,9 @@ const ACTS = [
     bg: 'radial-gradient(ellipse at 55% 35%, rgba(46,150,110,.18) 0%, transparent 65%)',
   },
   {
-    tag: 'RECUPERACION',
+    tag: 'RECUPERACIÓN',
     title: 'De vuelta a tu vida en semanas',
-    body: 'Un plan de rehabilitacion personalizado acelera tu recuperacion. El 98% de nuestros pacientes retoma su actividad normal en menos de 3 meses.',
+    body: 'Un plan de rehabilitación personalizado acelera tu recuperación. El 98 % de nuestros pacientes retoma su actividad normal en menos de 3 meses.',
     icon: (
       <svg viewBox="0 0 80 80" width="80" height="80" fill="none">
         <path d="M12 44 C20 28, 36 20, 40 36 C44 20, 60 28, 68 44 C68 58, 54 68, 40 72 C26 68, 12 58, 12 44Z" stroke="currentColor" strokeWidth="2" opacity=".5" />
